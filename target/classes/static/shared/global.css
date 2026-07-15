@@ -1,0 +1,59 @@
+/* Global CSS variables & utilities */
+:root {
+    /* Emil Kowalski motion tokens */
+    --transition-fast: 150ms;
+    --transition-normal: 250ms;
+    --spring-easing: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --smooth-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Impecable typography limits */
+p, .text-max-65 {
+    max-width: 65ch;
+}
+
+/* Smooth motion utilities */
+.spring-transform {
+    transition-property: transform, box-shadow, background-color;
+    transition-duration: var(--transition-normal);
+    transition-timing-function: var(--spring-easing);
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s var(--smooth-easing) forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Taste minimal glassmorphism */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Form inputs polishing */
+.input-minimal {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    padding: 0.75rem 1rem;
+    transition: all var(--transition-fast) var(--smooth-easing);
+}
+
+.input-minimal:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    background-color: #ffffff;
+}

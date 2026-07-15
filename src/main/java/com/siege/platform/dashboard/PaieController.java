@@ -1,0 +1,184 @@
+package com.siege.platform.dashboard;
+
+import com.siege.platform.config.security.JwtUtils;
+import com.siege.platform.facturation.Facture;
+import com.siege.platform.facturation.FactureRepository;
+import com.siege.platform.facturation.FactureService;
+import com.siege.platform.paie.BulletinDePaie;
+import com.siege.platform.paie.BulletinDePaieRepository;
+import com.siege.platform.paie.PaieCalculService;
+import com.siege.platform.poste.Affectation;
+import com.siege.platform.poste.AffectationRepository;
+import com.siege.platform.structuredemandeuse.StructureDemandeuse;
+import com.siege.platform.structuredemandeuse.StructureDemandeuseRepository;
+import com.siege.platform.utilisateur.Utilisateur;
+import com.siege.platform.utilisateur.UtilisateurRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+@RestController
+@RequestMapping("/api/paie")
+@PreAuthorize("hasAnyRole('ADMIN_ENTREPRISE', 'SUPER_ADMIN')")
+public class PaieController {
+
+    private final BulletinDePaieRepository bulletinRepo;
+    private final FactureRepository factureRepo;
+    private final AffectationRepository affectationRepo;
+    private final PaieCalculService paieCalculService;
+    private final UtilisateurRepository utilisateurRepo;
+    private final JwtUtils jwtUtils;
+    private final FactureService factureService;
+    private final StructureDemandeuseRepository structureRepo;
+
+    public PaieController(BulletinDePaieRepository bulletinRepo,
+                          FactureRepository factureRepo,
+                          AffectationRepository affectationRepo,
+                          PaieCalculService paieCalculService,
+                          UtilisateurRepository utilisateurRepo,
+                          JwtUtils jwtUtils,
+                          FactureService factureService,
+                          StructureDemandeuseRepository structureRepo) {
+        this.bulletinRepo = bulletinRepo;
+        this.factureRepo = factureRepo;
+        this.affectationRepo = affectationRepo;
+        this.paieCalculService = paieCalculService;
+        this.utilisateurRepo = utilisateurRepo;
+        this.jwtUtils = jwtUtils;
+        this.factureService = factureService;
+        this.structureRepo = structureRepo;
+    }
+
+
+    /** Liste tous les bulletins de paie (filtrés par tenant via Hibernate Filter) */
+    @GetMapping("/bulletins")
+    public ResponseEntity<List<Map<String, Object>>> getBulletins() {
+        List<BulletinDePaie> bulletins = bulletinRepo.findAll();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (BulletinDePaie b : bulletins) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", b.getId());
+            m.put("periode", b.getPeriode());
+            m.put("agentNom", b.getAgent() != null ? b.getAgent().getNom() + " " + b.getAgent().getPrenom() : "—");
+            m.put("salaireBrutEffectif", b.getSalaireBrutEffectif());
+            m.put("salaireNetCalcule", b.getSalaireNetCalcule());
+            m.put("statutPaiement", b.getStatutPaiement());
+            m.put("dateCloture", b.getDateCloture() != null ? b.getDateCloture().toString() : "—");
+            m.put("joursValides", b.getJoursValides());
+            m.put("joursAbsNonJust", b.getJoursAbsenceNonJustifiee());
+            result.add(m);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /** Génère un bulletin de paie manuellement pour une affectation */
+    @PostMapping("/bulletins/generer")
+    public ResponseEntity<?> genererBulletin(@RequestBody Map<String, Object> payload) {
+        try {
+            UUID affectationId = UUID.fromString((String) payload.get("affectationId"));
+            Affectation affectation = affectationRepo.findById(affectationId)
+                    .orElseThrow(() -> new RuntimeException("Affectation introuvable."));
+            String periode = (String) payload.get("periode");
+            int joursPrevus = ((Number) payload.get("joursPrevus")).intValue();
+            int joursValides = ((Number) payload.get("joursValides")).intValue();
+            int joursAbsJustCourte = payload.containsKey("joursAbsJustCourte") ? ((Number) payload.get("joursAbsJustCourte")).intValue() : 0;
+            int joursAbsJustLongue = payload.containsKey("joursAbsJustLongue") ? ((Number) payload.get("joursAbsJustLongue")).intValue() : 0;
+            int joursAbsNonJust = payload.containsKey("joursAbsNonJust") ? ((Number) payload.get("joursAbsNonJust")).intValue() : 0;
+            int joursCongePaye = payload.containsKey("joursCongePaye") ? ((Number) payload.get("joursCongePaye")).intValue() : 0;
+
+            BulletinDePaie bulletin = paieCalculService.genererBulletin(
+                    affectation, periode, joursPrevus, joursValides,
+                    joursAbsJustCourte, joursAbsJustLongue, joursAbsNonJust, joursCongePaye);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Bulletin généré !",
+                    "id", bulletin.getId(),
+                    "salaireNet", bulletin.getSalaireNetCalcule()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /** Liste toutes les factures */
+    @GetMapping("/factures")
+    public ResponseEntity<List<Map<String, Object>>> getFactures() {
+        List<Facture> factures = factureRepo.findAll();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Facture f : factures) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", f.getId());
+            m.put("periode", f.getPeriode());
+            m.put("clientNom", f.getStructureDemandeuse() != null ? f.getStructureDemandeuse().getRaisonSociale() : "—");
+            m.put("montantFacture", f.getMontantFacture());
+            m.put("statutPaiement", f.getStatutPaiement());
+            m.put("dateEmission", f.getDateEmission() != null ? f.getDateEmission().toString() : "—");
+            result.add(m);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /** Marque un bulletin comme payé */
+    @PostMapping("/bulletins/{id}/payer")
+    public ResponseEntity<?> payerBulletin(@PathVariable UUID id) {
+        return bulletinRepo.findById(id).map(b -> {
+            b.setStatutPaiement("PAYE");
+            bulletinRepo.save(b);
+            return ResponseEntity.ok(Map.of("message", "Bulletin marqué comme payé."));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    /** Marque une facture comme payée */
+    @PostMapping("/factures/{id}/payer")
+    public ResponseEntity<?> payerFacture(@PathVariable UUID id) {
+        return factureRepo.findById(id).map(f -> {
+            f.setStatutPaiement("PAYE");
+            factureRepo.save(f);
+            return ResponseEntity.ok(Map.of("message", "Facture marquée comme payée."));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    /** Génère une facture client */
+    @PostMapping("/factures/generer")
+    public ResponseEntity<?> genererFacture(@RequestBody Map<String, Object> payload) {
+        try {
+            UUID structureId = UUID.fromString((String) payload.get("structureId"));
+            String periode = (String) payload.get("periode");
+            String rapportUrl = (String) payload.get("rapportUrl");
+            if (rapportUrl == null || rapportUrl.isBlank()) {
+                rapportUrl = "/rapports/rapport_" + structureId + "_" + periode + ".pdf"; // Simulated PDF
+            }
+            java.math.BigDecimal montant = new java.math.BigDecimal(payload.get("montant").toString());
+
+            StructureDemandeuse client = structureRepo.findById(structureId)
+                    .orElseThrow(() -> new RuntimeException("Structure cliente introuvable."));
+
+            List<Affectation> all = affectationRepo.findAll();
+            Set<Affectation> affectationsConcernees = new HashSet<>();
+            for (Affectation a : all) {
+                if (a.getPoste() != null && a.getPoste().getSite() != null &&
+                    a.getPoste().getSite().getStructureDemandeuse() != null &&
+                    a.getPoste().getSite().getStructureDemandeuse().getId().equals(structureId)) {
+                    affectationsConcernees.add(a);
+                }
+            }
+
+            if (affectationsConcernees.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Aucune affectation active pour ce client."));
+            }
+
+            Facture facture = factureService.genererFacture(client, periode, montant, rapportUrl, affectationsConcernees);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Facture générée avec succès !",
+                    "id", facture.getId(),
+                    "montant", facture.getMontantFacture()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+}
+

@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="fr" class="antialiased scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Admin Entreprise — SimpleTaff</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+        .glass { background: rgba(255,255,255,0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.45); box-shadow: 0 8px 32px -8px rgba(0,0,0,0.06); }
+        .sidebar-link { display: flex; align-items: center; padding: 12px 18px; border-radius: 12px; font-weight: 600; font-size: 14px; transition: all 200ms ease; color: #64748b; cursor: pointer; }
+        .sidebar-link:hover { background: #f1f5f9; color: #1e293b; }
+        .sidebar-link.active { background: #e0f2fe; color: #0284c7; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+        .input-field { width: 100%; border-radius: 10px; border: 1.5px solid #e2e8f0; background: rgba(255,255,255,0.8); padding: 10px 14px; transition: all 150ms; outline: none; font-size: 14px; }
+        .input-field:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2,132,199,0.1); background: #fff; }
+        .btn-brand { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; font-weight: 700; border-radius: 12px; padding: 10px 20px; font-size: 14px; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+        .btn-brand:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(2,132,199,0.4); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-72 glass border-r border-slate-200/60 flex flex-col justify-between hidden md:flex h-full z-10">
+        <div>
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-blue-600 shadow-md flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <span class="font-extrabold text-lg text-slate-900">SimpleTaff Admin</span>
+            </div>
+            <nav class="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-160px)]">
+                <div class="sidebar-link active" onclick="showTab('overview')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    Vue d'ensemble
+                </div>
+                <div class="sidebar-link" onclick="showTab('org')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    Zones & Coordonnateurs
+                </div>
+                <div class="sidebar-link" onclick="showTab('catalog')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Catalogue & Agents
+                </div>
+                <div class="sidebar-link" onclick="showTab('clients')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    Clients, Sites & Employeurs
+                </div>
+                <div class="sidebar-link" onclick="showTab('postes')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    Postes & Affectations
+                </div>
+                <div class="sidebar-link" onclick="showTab('paie')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Configuration & Paie
+                </div>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+            <div class="text-xs text-slate-500 mb-2 font-bold flex items-center justify-between">
+                <span>Entreprise :</span>
+                <span id="enterpriseNameDisplay" class="text-slate-900">—</span>
+            </div>
+            <button onclick="logout()" class="flex w-full items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 flex items-center justify-between px-8 border-b border-slate-200/60 bg-white/60 backdrop-blur-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">Espace Administration Entreprise</h1>
+                <p class="text-xs text-slate-400">SimpleTaff SaaS Platform</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="badge bg-sky-100 text-sky-700">ADMIN_ENTREPRISE</span>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 space-y-8">
+
+            <!-- ================= TAB: Vue d'ensemble ================= -->
+            <div id="tab-overview" class="tab-content active space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass p-6 rounded-2xl">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Agents actifs</p>
+                        <div class="text-3xl font-extrabold text-slate-900 mt-1" id="statOverviewAgents">—</div>
+                    </div>
+                    <div class="glass p-6 rounded-2xl">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Postes créés</p>
+                        <div class="text-3xl font-extrabold text-sky-600 mt-1" id="statOverviewPostes">—</div>
+                    </div>
+                    <div class="glass p-6 rounded-2xl">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Affectations actives</p>
+                        <div class="text-3xl font-extrabold text-indigo-600 mt-1" id="statOverviewAffectations">—</div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="font-bold text-slate-900">Affectations récentes</h2>
+                        <button onclick="showTab('postes')" class="text-xs text-sky-600 font-bold hover:underline">Voir tout →</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead><tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase">
+                                <th class="px-6 py-3">Agent</th>
+                                <th class="px-6 py-3">Poste / Rôle</th>
+                                <th class="px-6 py-3">Site</th>
+                                <th class="px-6 py-3">Début</th>
+                                <th class="px-6 py-3">Statut</th>
+                            </tr></thead>
+                            <tbody id="overviewAffectationsTable" class="divide-y divide-slate-100 text-sm">
+                                <tr><td colspan="5" class="px-6 py-6 text-center text-slate-400">Chargement…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: Zones & Coordonnateurs ================= -->
+            <div id="tab-org" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Zones Section -->
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-slate-900">Zones géographiques</h2>
+                        </div>
+                        <div class="glass p-5 rounded-2xl space-y-4">
+                            <form id="addZoneForm" class="grid grid-cols-1 gap-3">
+                                <input type="text" id="zoneNom" required class="input-field" placeholder="Nom de la zone (ex: Zone Sud)">
+                                <input type="text" id="zoneDescription" class="input-field" placeholder="Description courte">
+                                <input type="text" id="zonePerimetre" class="input-field" placeholder="Périmètre géographique">
+                                <button type="submit" class="btn-brand py-2 text-xs">Créer la zone</button>
+                            </form>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-2">Nom</th>
+                                        <th class="p-2">Description</th>
+                                        <th class="p-2">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="zonesTableBody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic zones -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coordonnateurs Section -->
+                    <div class="space-y-4">
+                        <h2 class="text-lg font-bold text-slate-900">Coordonnateurs de Zone</h2>
+                        <div class="glass p-5 rounded-2xl space-y-4">
+                            <form id="addCoordForm" class="grid grid-cols-1 gap-3">
+                                <input type="text" id="coordNom" required class="input-field" placeholder="Nom">
+                                <input type="text" id="coordPrenom" required class="input-field" placeholder="Prénom">
+                                <input type="email" id="coordEmail" required class="input-field" placeholder="Email">
+                                <input type="password" id="coordPassword" required class="input-field" placeholder="Mot de passe">
+                                <select id="coordZoneSelect" class="input-field">
+                                    <option value="">Associer à une zone (Optionnel)</option>
+                                </select>
+                                <button type="submit" class="btn-brand py-2 text-xs">Ajouter le coordonnateur</button>
+                            </form>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-2">Nom & Prénom</th>
+                                        <th class="p-2">Email</th>
+                                        <th class="p-2">Zone</th>
+                                        <th class="p-2">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="coordsTableBody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic coords -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: Catalogue & Agents ================= -->
+            <div id="tab-catalog" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- catalogue Emploi -->
+                    <div class="lg:col-span-4 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-900">Catalogue des Emplois</h2>
+                        <div class="glass p-5 rounded-2xl space-y-4">
+                            <form id="addEmploiForm" class="grid grid-cols-1 gap-3">
+                                <input type="text" id="emploiLibelle" required class="input-field" placeholder="Libellé du poste (ex: Agent de Sécurité)">
+                                <input type="text" id="emploiDescription" class="input-field" placeholder="Description">
+                                <input type="text" id="emploiCategorie" class="input-field" placeholder="Catégorie professionnelle">
+                                <input type="text" id="emploiCompetences" class="input-field" placeholder="Compétences requises (virgules)">
+                                <input type="number" id="emploiSalaire" required class="input-field" placeholder="Salaire brut indicatif">
+                                <button type="submit" class="btn-brand py-2 text-xs">Ajouter au catalogue</button>
+                            </form>
+                            <div class="overflow-y-auto max-h-[300px]">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-2">Poste</th>
+                                        <th class="p-2">Brut indicatif</th>
+                                        <th class="p-2">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="emploisTableBody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic jobs -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- agents de terrain -->
+                    <div class="lg:col-span-8 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-900">Personnel / Agents Terrain</h2>
+                        <div class="glass p-5 rounded-2xl grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div class="md:col-span-4 space-y-4">
+                                <h3 class="font-bold text-sm text-slate-800">Ajouter un agent</h3>
+                                <form id="addAgentForm" class="space-y-3">
+                                    <input type="text" id="agentNom" required class="input-field" placeholder="Nom">
+                                    <input type="text" id="agentPrenom" required class="input-field" placeholder="Prénom">
+                                    <input type="text" id="agentContact" required class="input-field" placeholder="Contact (+225...)">
+                                    <select id="agentZoneSelect" required class="input-field">
+                                        <option value="">Sélectionner sa zone</option>
+                                    </select>
+                                    <button type="submit" class="btn-brand w-full py-2 text-xs">Enregistrer l'agent</button>
+                                </form>
+                            </div>
+                            <div class="md:col-span-8 overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-2">Nom & Prénom</th>
+                                        <th class="p-2">Contact</th>
+                                        <th class="p-2">Zone</th>
+                                        <th class="p-2">Code QR</th>
+                                    </tr></thead>
+                                    <tbody id="agentsTableBody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic agents -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: Clients & Sites ================= -->
+            <div id="tab-clients" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- Structures demandeuses -->
+                    <div class="lg:col-span-4 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-900">Structures Clientes</h2>
+                        <div class="glass p-5 rounded-2xl space-y-4">
+                            <form id="addStructureForm" class="grid grid-cols-1 gap-3">
+                                <input type="text" id="structRaisonSociale" required class="input-field" placeholder="Raison Sociale">
+                                <input type="text" id="structSecteur" class="input-field" placeholder="Secteur d'activité">
+                                <label class="flex items-center gap-2 text-xs text-slate-600">
+                                    <input type="checkbox" id="structBesoins"> Besoins récurrents
+                                </label>
+                                <button type="submit" class="btn-brand py-2 text-xs">Ajouter le client</button>
+                            </form>
+                            <div class="overflow-y-auto max-h-[300px]">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-2">Raison sociale</th>
+                                        <th class="p-2">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="structuresTableBody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic structures -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sites & Employeurs -->
+                    <div class="lg:col-span-8 space-y-6">
+                        <div class="space-y-4">
+                            <h2 class="text-lg font-bold text-slate-900">Sites d'affectation</h2>
+                            <div class="glass p-5 rounded-2xl grid grid-cols-1 md:grid-cols-12 gap-6">
+                                <div class="md:col-span-4 space-y-3">
+                                    <form id="addSiteForm" class="space-y-3">
+                                        <input type="text" id="siteNom" required class="input-field" placeholder="Nom du Site">
+                                        <input type="text" id="siteAdresse" required class="input-field" placeholder="Adresse complète">
+                                        <select id="siteStructSelect" required class="input-field">
+                                            <option value="">Sélectionner le Client</option>
+                                        </select>
+                                        <select id="siteZoneSelect" required class="input-field">
+                                            <option value="">Associer à une Zone</option>
+                                        </select>
+                                        <button type="submit" class="btn-brand w-full py-2 text-xs">Créer le site</button>
+                                    </form>
+                                </div>
+                                <div class="md:col-span-8 overflow-x-auto">
+                                    <table class="w-full text-left text-xs">
+                                        <thead><tr class="bg-slate-100 font-bold">
+                                            <th class="p-2">Nom</th>
+                                            <th class="p-2">Client</th>
+                                            <th class="p-2">Zone</th>
+                                            <th class="p-2">Actions</th>
+                                        </tr></thead>
+                                        <tbody id="sitesTableBody" class="divide-y divide-slate-100">
+                                            <!-- Dynamic sites -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employeurs -->
+                        <div class="space-y-4">
+                            <h2 class="text-lg font-bold text-slate-900">Comptes Employeurs (Scan Pointage)</h2>
+                            <div class="glass p-5 rounded-2xl grid grid-cols-1 md:grid-cols-12 gap-6">
+                                <div class="md:col-span-4 space-y-3">
+                                    <form id="addEmployeurForm" class="space-y-3">
+                                        <input type="text" id="empNom" required class="input-field" placeholder="Nom">
+                                        <input type="text" id="empPrenom" required class="input-field" placeholder="Prénom">
+                                        <input type="email" id="empEmail" required class="input-field" placeholder="Email (Identifiant)">
+                                        <input type="password" id="empPassword" required class="input-field" placeholder="Mot de passe">
+                                        <select id="empStructSelect" required class="input-field">
+                                            <option value="">Lier au Client</option>
+                                        </select>
+                                        <div class="text-xs font-bold text-slate-500">Sélectionner les sites :</div>
+                                        <div id="empSitesCheckboxList" class="max-h-24 overflow-y-auto border p-2 rounded bg-white text-xs space-y-1">
+                                            <!-- Site checkboxes -->
+                                        </div>
+                                        <button type="submit" class="btn-brand w-full py-2 text-xs">Créer le compte employeur</button>
+                                    </form>
+                                </div>
+                                <div class="md:col-span-8 overflow-x-auto">
+                                    <table class="w-full text-left text-xs">
+                                        <thead><tr class="bg-slate-100 font-bold">
+                                            <th class="p-2">Nom</th>
+                                            <th class="p-2">Client lié</th>
+                                            <th class="p-2">Sites assignés</th>
+                                            <th class="p-2">Actions</th>
+                                        </tr></thead>
+                                        <tbody id="employeursTableBody" class="divide-y divide-slate-100">
+                                            <!-- Dynamic employeurs -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: Postes & Affectations ================= -->
+            <div id="tab-postes" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- Postes Section -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-900">Postes Ouverts</h2>
+                        <div class="glass p-5 rounded-2xl space-y-4">
+                            <form id="addPosteForm" class="grid grid-cols-1 gap-3">
+                                <select id="posteSiteSelect" required class="input-field">
+                                    <option value="">Sélectionner le Site</option>
+                                </select>
+                                <select id="posteEmploiSelect" required class="input-field">
+                                    <option value="">Sélectionner l'Emploi</option>
+                                </select>
+                                <input type="number" id="posteSalaireNegocie" required class="input-field" placeholder="Salaire Brut Négocié">
+                                <input type="number" id="posteRetenue" required class="input-field" placeholder="Retenue forfaitaire d'absence / jour">
+                                <button type="submit" class="btn-brand py-2 text-xs">Ouvrir le poste</button>
+                            </form>
+                            <div class="overflow-y-auto max-h-[300px]">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-2">Poste / Rôle</th>
+                                        <th class="p-2">Site</th>
+                                        <th class="p-2">Brut</th>
+                                        <th class="p-2">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="postesTableBody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic postes -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Affectations Section -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-900">Affectations des Agents</h2>
+                        <div class="glass p-5 rounded-2xl grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div class="md:col-span-4 space-y-3">
+                                <h3 class="font-bold text-sm text-slate-800">Affecter un agent</h3>
+                                <form id="addAffForm" class="space-y-3">
+                                    <select id="affPosteSelect" required class="input-field">
+                                        <option value="">Choisir un Poste</option>
+                                    </select>
+                                    <select id="affAgentSelect" required class="input-field">
+                                        <option value="">Choisir un Agent</option>
+                                    </select>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">Date début</label>
+                                        <input type="date" id="affDateDebut" required class="input-field">
+                                    </div>
+                                    <button type="submit" class="btn-brand w-full py-2 text-xs">Confirmer l'affectation</button>
+                                </form>
+                            </div>
+                            <div class="md:col-span-8 overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-2">Agent</th>
+                                        <th class="p-2">Rôle / Site</th>
+                                        <th class="p-2">Date début</th>
+                                        <th class="p-2">Statut</th>
+                                        <th class="p-2">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="affectationsTableBody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic affectations -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB: Configuration & Paie ================= -->
+            <div id="tab-paie" class="tab-content space-y-6">
+                <!-- Config Paie -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-4 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-900">Règles & Cotisations</h2>
+                        <div class="glass p-5 rounded-2xl space-y-4">
+                            <form id="updateConfigForm" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Taux de Cotisation (%)</label>
+                                    <input type="number" step="0.01" id="configTauxCotisation" required class="input-field">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Seuil Absence Longue (jours)</label>
+                                    <input type="number" id="configSeuilAbsence" required class="input-field">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Taux Retenue Réduite (%)</label>
+                                    <input type="number" step="0.01" id="configTauxRetenue" required class="input-field">
+                                </div>
+                                <button type="submit" class="btn-brand w-full py-2 text-xs">Enregistrer les règles</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Bulletins & Facturation -->
+                    <div class="lg:col-span-8 space-y-6">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-bold text-slate-900">Bulletins de Paie Agents</h2>
+                                <button onclick="openCalculModal()" class="btn-brand py-1.5 text-xs">Calculer Bulletin</button>
+                            </div>
+                            <div class="glass rounded-2xl overflow-hidden">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-3">Période</th>
+                                        <th class="p-3">Agent</th>
+                                        <th class="p-3">Net Calculé</th>
+                                        <th class="p-3">Jours Valides / Abs</th>
+                                        <th class="p-3">Statut</th>
+                                        <th class="p-3">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="bulletinsTableBody" class="divide-y divide-slate-100">
+                                        <!-- Bulletins list -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-bold text-slate-900">Factures Clients (Structures)</h2>
+                                <button onclick="openFactureModal()" class="btn-brand py-1.5 text-xs">Émettre Facture</button>
+                            </div>
+                            <div class="glass rounded-2xl overflow-hidden">
+                                <table class="w-full text-left text-xs">
+                                    <thead><tr class="bg-slate-100 font-bold">
+                                        <th class="p-3">Date</th>
+                                        <th class="p-3">Période</th>
+                                        <th class="p-3">Client</th>
+                                        <th class="p-3">Montant</th>
+                                        <th class="p-3">Statut</th>
+                                        <th class="p-3">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="facturesTableBody" class="divide-y divide-slate-100">
+                                        <!-- Factures list -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal image zoom QR -->
+    <div id="qrModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center space-y-4">
+            <h3 class="font-bold text-slate-900" id="qrModalTitle">Badge QR Code</h3>
+            <div class="flex items-center justify-center border-4 border-slate-100 p-4 rounded-2xl">
+                <img id="qrModalImg" src="" alt="QR Code zoomed" class="w-56 h-56">
+            </div>
+            <p class="text-xs text-slate-400">Imprimez ou présentez ce badge à l'employeur lors du scan d'entrée/sortie.</p>
+            <button onclick="closeQrModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs transition-colors">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal Calcul Bulletin -->
+    <div id="calculModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4">
+            <h3 class="font-bold text-slate-900 text-base">Générer manuellement un Bulletin de Paie</h3>
+            <form id="calculBulletinForm" class="space-y-3">
+                <select id="calcAffSelect" required class="input-field">
+                    <option value="">Choisir l'Affectation</option>
+                </select>
+                <input type="text" id="calcPeriode" required class="input-field" placeholder="Période (ex: 2026-07)">
+                <input type="number" id="calcJoursPrevus" required class="input-field" placeholder="Jours prévus (ex: 22)">
+                <input type="number" id="calcJoursValides" required class="input-field" placeholder="Jours travaillés et validés">
+                <input type="number" id="calcAbsJustCourte" class="input-field" placeholder="Absences justifiées courtes">
+                <input type="number" id="calcAbsJustLongue" class="input-field" placeholder="Absences justifiées longues">
+                <input type="number" id="calcAbsNonJust" class="input-field" placeholder="Absences NON justifiées">
+                <input type="number" id="calcConges" class="input-field" placeholder="Congés payés">
+                
+                <div class="flex gap-2">
+                    <button type="submit" class="btn-brand flex-1 py-2 text-xs">Calculer & Enregistrer</button>
+                    <button type="button" onclick="closeCalculModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl text-xs transition-colors">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Calcul Facture -->
+    <div id="factureModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4">
+            <h3 class="font-bold text-slate-900 text-base">Émettre une Facture Client</h3>
+            <form id="genererFactureForm" class="space-y-3">
+                <select id="factureStructSelect" required class="input-field">
+                    <option value="">Choisir la Structure Cliente</option>
+                </select>
+                <input type="text" id="facturePeriode" required class="input-field" placeholder="Période (ex: 2026-07)">
+                <input type="number" id="factureMontant" required class="input-field" placeholder="Montant de la Facture (FCFA)">
+                <input type="text" id="factureRapportUrl" class="input-field" placeholder="Lien du Rapport de Pointage PDF (optionnel)">
+                
+                <div class="flex gap-2">
+                    <button type="submit" class="btn-brand flex-1 py-2 text-xs">Générer & Valider</button>
+                    <button type="button" onclick="closeFactureModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl text-xs transition-colors">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { apiFetch, logout, checkAuth } from '/shared/api.js';
+        window.logout = logout;
+
+        if (!checkAuth()) {
+            window.location.href = '/vitrine/login.html';
+        }
+
+        const currentRole = localStorage.getItem('userRole');
+        if (currentRole !== 'ROLE_ADMIN_ENTREPRISE') {
+            if (currentRole === 'ROLE_SUPER_ADMIN') {
+                window.location.href = '/super-admin/';
+            } else if (currentRole === 'ROLE_COORDONNATEUR') {
+                window.location.href = '/coordonnateur/';
+            } else if (currentRole === 'ROLE_EMPLOYEUR') {
+                window.location.href = '/employeur/';
+            } else {
+                logout();
+            }
+            throw new Error('Redirection vers l espace autorise.');
+        }
+
+        window.showTab = function(name) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            
+            const targetTab = document.getElementById('tab-' + name);
+            if (targetTab) targetTab.classList.add('active');
+            
+            document.querySelectorAll('.sidebar-link').forEach(l => {
+                if (l.getAttribute('onclick')?.includes("'" + name + "'")) l.classList.add('active');
+            });
+            
+            if (name === 'overview') loadOverview();
+            if (name === 'org') loadOrg();
+            if (name === 'catalog') loadCatalog();
+            if (name === 'clients') loadClients();
+            if (name === 'postes') loadPostesAndAff();
+            if (name === 'paie') loadPaieAndConfig();
+        };
+
+        // QR Code Modal Helper
+        window.zoomQr = function(agentNom, codeQr) {
+            document.getElementById('qrModalTitle').textContent = `Badge QR Code — ${agentNom}`;
+            document.getElementById('qrModalImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${codeQr}`;
+            document.getElementById('qrModal').classList.remove('hidden');
+        };
+        window.closeQrModal = function() {
+            document.getElementById('qrModal').classList.add('hidden');
+        };
+
+        // Calculations Modal Helper
+        window.openCalculModal = function() {
+            document.getElementById('calculModal').classList.remove('hidden');
+        };
+        window.openFactureModal = function() {
+            document.getElementById('factureModal').classList.remove('hidden');
+        };
+        window.closeFactureModal = function() {
+            document.getElementById('factureModal').classList.add('hidden');
+        };
+
+
+        // Load Overview
+        async function loadOverview() {
+            try {
+                const stats = await apiFetch('/dashboard/admin');
+                document.getElementById('statOverviewAgents').textContent = stats.totalAgents ?? '0';
+                document.getElementById('statOverviewPostes').textContent = stats.totalPostes ?? '0';
+                document.getElementById('statOverviewAffectations').textContent = stats.totalAffectationsActives ?? '0';
+
+                // Load recent affectations
+                const affectations = await apiFetch('/admin/affectations');
+                const tbody = document.getElementById('overviewAffectationsTable');
+                if (!affectations || affectations.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-6 text-center text-slate-400">Aucune affectation récente.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = affectations.slice(0, 5).map(a => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 font-bold text-slate-900">${a.agentNom}</td>
+                        <td class="px-6 py-4 text-slate-500">${a.posteLibelle}</td>
+                        <td class="px-6 py-4 text-slate-500">${a.siteNom}</td>
+                        <td class="px-6 py-4 text-slate-500">${a.dateDebut}</td>
+                        <td class="px-6 py-4"><span class="badge ${a.statut === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">${a.statut}</span></td>
+                    </tr>`).join('');
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // Load Organisation (Zones & Coordonnateurs)
+        async function loadOrg() {
+            try {
+                // Get Zones
+                const zones = await apiFetch('/organisation/zones');
+                const zoneTbody = document.getElementById('zonesTableBody');
+                zoneTbody.innerHTML = zones.map(z => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${z.nom}</td>
+                        <td class="p-2 text-slate-500">${z.description || '—'}</td>
+                        <td class="p-2"><button onclick="deleteZone('${z.id}')" class="text-red-500 hover:underline">Supprimer</button></td>
+                    </tr>`).join('') || '<tr><td colspan="3" class="p-3 text-center text-slate-400">Aucune zone.</td></tr>';
+
+                // Populate Dropdown for Coordonnateurs
+                const coordZoneSelect = document.getElementById('coordZoneSelect');
+                coordZoneSelect.innerHTML = '<option value="">Associer à une zone (Optionnel)</option>' +
+                    zones.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+
+                // Get Coordonnateurs
+                const coords = await apiFetch('/organisation/coordonnateurs');
+                const coordTbody = document.getElementById('coordsTableBody');
+                coordTbody.innerHTML = coords.map(c => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${c.nom} ${c.prenom}</td>
+                        <td class="p-2 text-slate-500">${c.email}</td>
+                        <td class="p-2"><span class="badge bg-slate-100 text-slate-600">${c.zoneNom || 'Non assigné'}</span></td>
+                        <td class="p-2"><button onclick="deleteCoord('${c.id}')" class="text-red-500 hover:underline">Supprimer</button></td>
+                    </tr>`).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Aucun coordonnateur.</td></tr>';
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        window.deleteZone = async function(id) {
+            if (!confirm("Supprimer cette zone ?")) return;
+            try {
+                await apiFetch(`/organisation/zones/${id}`, { method: 'DELETE' });
+                loadOrg();
+            } catch (e) { alert(e.message); }
+        };
+
+        window.deleteCoord = async function(id) {
+            if (!confirm("Supprimer ce coordonnateur ?")) return;
+            try {
+                await apiFetch(`/organisation/coordonnateurs/${id}`, { method: 'DELETE' });
+                loadOrg();
+            } catch (e) { alert(e.message); }
+        };
+
+        document.getElementById('addZoneForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Creation...';
+            try {
+                await apiFetch('/organisation/zones', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        nom: document.getElementById('zoneNom').value.trim(),
+                        description: document.getElementById('zoneDescription').value.trim(),
+                        perimetre: document.getElementById('zonePerimetre').value.trim()
+                    })
+                });
+                form.reset();
+                loadOrg();
+            } catch (err) {
+                alert(err.message || "Impossible de creer la zone.");
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Créer la zone';
+            }
+        });
+
+        document.getElementById('addCoordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/organisation/coordonnateurs', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        nom: document.getElementById('coordNom').value,
+                        prenom: document.getElementById('coordPrenom').value,
+                        email: document.getElementById('coordEmail').value,
+                        motDePasse: document.getElementById('coordPassword').value,
+                        zoneId: document.getElementById('coordZoneSelect').value || null
+                    })
+                });
+                document.getElementById('addCoordForm').reset();
+                loadOrg();
+            } catch (err) { alert(err.message); }
+        });
+
+        // Load Catalogue & Agents
+        async function loadCatalog() {
+            try {
+                // Get Emplois
+                const emplois = await apiFetch('/organisation/emplois');
+                const emploiTbody = document.getElementById('emploisTableBody');
+                emploiTbody.innerHTML = emplois.map(e => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${e.libelle}</td>
+                        <td class="p-2 text-slate-500">${e.salaireBrutReference} FCFA</td>
+                        <td class="p-2"><button onclick="deleteEmploi('${e.id}')" class="text-red-500 hover:underline">Supprimer</button></td>
+                    </tr>`).join('') || '<tr><td colspan="3" class="p-3 text-center text-slate-400">Catalogue vide.</td></tr>';
+
+                // Fetch zones for agents creation
+                const zones = await apiFetch('/organisation/zones');
+                const agentZoneSelect = document.getElementById('agentZoneSelect');
+                agentZoneSelect.innerHTML = '<option value="">Sélectionner sa zone</option>' +
+                    zones.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+
+                // Get Agents
+                const agents = await apiFetch('/agents');
+                const agentsTbody = document.getElementById('agentsTableBody');
+                agentsTbody.innerHTML = agents.map(a => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${a.nom} ${a.prenom}</td>
+                        <td class="p-2 text-slate-500">${a.contact}</td>
+                        <td class="p-2 text-slate-500">${a.zoneNom}</td>
+                        <td class="p-2">
+                            <button onclick="zoomQr('${a.nom} ${a.prenom}', '${a.codeQr}')" class="flex items-center gap-1 text-sky-600 hover:text-sky-850 font-bold">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=${a.codeQr}" class="w-6 h-6 border rounded" />
+                                <span>Badge QR</span>
+                            </button>
+                        </td>
+                    </tr>`).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Aucun agent enregistré.</td></tr>';
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        window.deleteEmploi = async function(id) {
+            if (!confirm("Supprimer cet emploi ?")) return;
+            try {
+                await apiFetch(`/organisation/emplois/${id}`, { method: 'DELETE' });
+                loadCatalog();
+            } catch (e) { alert(e.message); }
+        };
+
+        document.getElementById('addEmploiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/organisation/emplois', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        libelle: document.getElementById('emploiLibelle').value,
+                        description: document.getElementById('emploiDescription').value,
+                        categorie: document.getElementById('emploiCategorie').value,
+                        competencesRequises: document.getElementById('emploiCompetences').value,
+                        salaireBrutReference: document.getElementById('emploiSalaire').value
+                    })
+                });
+                document.getElementById('addEmploiForm').reset();
+                loadCatalog();
+            } catch (err) { alert(err.message); }
+        });
+
+        document.getElementById('addAgentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/agents', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        nom: document.getElementById('agentNom').value,
+                        prenom: document.getElementById('agentPrenom').value,
+                        contact: document.getElementById('agentContact').value,
+                        zoneId: document.getElementById('agentZoneSelect').value
+                    })
+                });
+                document.getElementById('addAgentForm').reset();
+                loadCatalog();
+            } catch (err) { alert(err.message); }
+        });
+
+        // Load Clients & Sites
+        async function loadClients() {
+            try {
+                // Get Structures
+                const structures = await apiFetch('/organisation/structures');
+                const structuresTbody = document.getElementById('structuresTableBody');
+                structuresTbody.innerHTML = structures.map(s => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${s.raisonSociale}</td>
+                        <td class="p-2"><button onclick="deleteStructure('${s.id}')" class="text-red-500 hover:underline">Supprimer</button></td>
+                    </tr>`).join('') || '<tr><td colspan="2" class="p-3 text-center text-slate-400">Aucun client.</td></tr>';
+
+                // Populate Dropdowns for Sites & Employeurs
+                const siteStructSelect = document.getElementById('siteStructSelect');
+                siteStructSelect.innerHTML = '<option value="">Sélectionner le Client</option>' +
+                    structures.map(s => `<option value="${s.id}">${s.raisonSociale}</option>`).join('');
+
+                const empStructSelect = document.getElementById('empStructSelect');
+                empStructSelect.innerHTML = '<option value="">Lier au Client</option>' +
+                    structures.map(s => `<option value="${s.id}">${s.raisonSociale}</option>`).join('');
+
+                const zones = await apiFetch('/organisation/zones');
+                const siteZoneSelect = document.getElementById('siteZoneSelect');
+                siteZoneSelect.innerHTML = '<option value="">Associer à une Zone</option>' +
+                    zones.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+
+                // Get Sites
+                const sites = await apiFetch('/organisation/sites');
+                const sitesTbody = document.getElementById('sitesTableBody');
+                sitesTbody.innerHTML = sites.map(s => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${s.nom}</td>
+                        <td class="p-2 text-slate-500">${s.structureNom}</td>
+                        <td class="p-2 text-slate-500">${s.zoneNom}</td>
+                        <td class="p-2"><button onclick="deleteSite('${s.id}')" class="text-red-500 hover:underline">Supprimer</button></td>
+                    </tr>`).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Aucun site.</td></tr>';
+
+                // Sites checklist in employeurs form
+                const empSitesCheckboxList = document.getElementById('empSitesCheckboxList');
+                empSitesCheckboxList.innerHTML = sites.map(s => `
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="empSites" value="${s.id}"> ${s.nom} (${s.structureNom})
+                    </label>
+                `).join('') || '<div class="text-slate-400">Aucun site créé</div>';
+
+                // Get Employeurs
+                const employeurs = await apiFetch('/organisation/employeurs');
+                const employeursTbody = document.getElementById('employeursTableBody');
+                employeursTbody.innerHTML = employeurs.map(emp => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${emp.nom} ${emp.prenom}</td>
+                        <td class="p-2 text-slate-500">${emp.structureNom}</td>
+                        <td class="p-2 text-slate-500">${emp.sites.join(', ') || '—'}</td>
+                        <td class="p-2"><button onclick="deleteEmployeur('${emp.id}')" class="text-red-500 hover:underline">Supprimer</button></td>
+                    </tr>`).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Aucun compte employeur.</td></tr>';
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        window.deleteStructure = async function(id) {
+            if (!confirm("Supprimer ce client ?")) return;
+            try {
+                await apiFetch(`/organisation/structures/${id}`, { method: 'DELETE' });
+                loadClients();
+            } catch (e) { alert(e.message); }
+        };
+
+        window.deleteSite = async function(id) {
+            if (!confirm("Supprimer ce site ?")) return;
+            try {
+                await apiFetch(`/organisation/sites/${id}`, { method: 'DELETE' });
+                loadClients();
+            } catch (e) { alert(e.message); }
+        };
+
+        window.deleteEmployeur = async function(id) {
+            if (!confirm("Supprimer ce compte employeur ?")) return;
+            try {
+                await apiFetch(`/organisation/employeurs/${id}`, { method: 'DELETE' });
+                loadClients();
+            } catch (e) { alert(e.message); }
+        };
+
+        document.getElementById('addStructureForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/organisation/structures', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        raisonSociale: document.getElementById('structRaisonSociale').value,
+                        secteur: document.getElementById('structSecteur').value,
+                        besoinsRecurrents: document.getElementById('structBesoins').checked
+                    })
+                });
+                document.getElementById('addStructureForm').reset();
+                loadClients();
+            } catch (err) { alert(err.message); }
+        });
+
+        document.getElementById('addSiteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/organisation/sites', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        nom: document.getElementById('siteNom').value,
+                        adresse: document.getElementById('siteAdresse').value,
+                        structureId: document.getElementById('siteStructSelect').value,
+                        zoneId: document.getElementById('siteZoneSelect').value
+                    })
+                });
+                document.getElementById('addSiteForm').reset();
+                loadClients();
+            } catch (err) { alert(err.message); }
+        });
+
+        document.getElementById('addEmployeurForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const checkedSites = Array.from(document.querySelectorAll('input[name="empSites"]:checked')).map(cb => cb.value);
+            try {
+                await apiFetch('/organisation/employeurs', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        nom: document.getElementById('empNom').value,
+                        prenom: document.getElementById('empPrenom').value,
+                        email: document.getElementById('empEmail').value,
+                        motDePasse: document.getElementById('empPassword').value,
+                        structureId: document.getElementById('empStructSelect').value,
+                        siteIds: checkedSites
+                    })
+                });
+                document.getElementById('addEmployeurForm').reset();
+                loadClients();
+            } catch (err) { alert(err.message); }
+        });
+
+        // Load Postes & Affectations
+        async function loadPostesAndAff() {
+            try {
+                // Populate Dropdowns for Postes Creation
+                const sites = await apiFetch('/organisation/sites');
+                const posteSiteSelect = document.getElementById('posteSiteSelect');
+                posteSiteSelect.innerHTML = '<option value="">Sélectionner le Site</option>' +
+                    sites.map(s => `<option value="${s.id}">${s.nom} (${s.structureNom})</option>`).join('');
+
+                const emplois = await apiFetch('/organisation/emplois');
+                const posteEmploiSelect = document.getElementById('posteEmploiSelect');
+                posteEmploiSelect.innerHTML = '<option value="">Sélectionner l\'Emploi</option>' +
+                    emplois.map(e => `<option value="${e.id}">${e.libelle}</option>`).join('');
+
+                // Get Postes
+                const postes = await apiFetch('/admin/postes');
+                const postesTbody = document.getElementById('postesTableBody');
+                postesTbody.innerHTML = postes.map(p => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${p.emploiLibelle}</td>
+                        <td class="p-2 text-slate-500">${p.siteNom}</td>
+                        <td class="p-2 text-slate-500">${p.salaireBrut} FCFA</td>
+                        <td class="p-2"><button onclick="deletePoste('${p.id}')" class="text-red-500 hover:underline">Supprimer</button></td>
+                    </tr>`).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Aucun poste créé.</td></tr>';
+
+                // Populate Dropdowns for Affectation Form
+                const affPosteSelect = document.getElementById('affPosteSelect');
+                affPosteSelect.innerHTML = '<option value="">Choisir un Poste</option>' +
+                    postes.map(p => `<option value="${p.id}">${p.siteNom} — ${p.emploiLibelle}</option>`).join('');
+
+                const agents = await apiFetch('/agents');
+                const affAgentSelect = document.getElementById('affAgentSelect');
+                affAgentSelect.innerHTML = '<option value="">Choisir un Agent</option>' +
+                    agents.map(a => `<option value="${a.id}">${a.nom} ${a.prenom}</option>`).join('');
+
+                // Get Affectations
+                const affectations = await apiFetch('/admin/affectations');
+                const affTbody = document.getElementById('affectationsTableBody');
+                affTbody.innerHTML = affectations.map(a => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-2 font-bold">${a.agentNom}</td>
+                        <td class="p-2 text-slate-500">${a.posteLibelle} / ${a.siteNom}</td>
+                        <td class="p-2 text-slate-500">${a.dateDebut}</td>
+                        <td class="p-2"><span class="badge ${a.statut === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}">${a.statut}</span></td>
+                        <td class="p-2">
+                            ${a.statut === 'ACTIVE' ? `<button onclick="cloturerAff('${a.id}')" class="text-xs bg-red-50 text-red-600 px-2 py-1 rounded">Clôturer</button>` : '—'}
+                        </td>
+                    </tr>`).join('') || '<tr><td colspan="5" class="p-3 text-center text-slate-400">Aucune affectation.</td></tr>';
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        window.deletePoste = async function(id) {
+            if (!confirm("Supprimer ce poste ?")) return;
+            try {
+                await apiFetch(`/admin/postes/${id}`, { method: 'DELETE' });
+                loadPostesAndAff();
+            } catch (e) { alert(e.message); }
+        };
+
+        window.cloturerAff = async function(id) {
+            if (!confirm("Clôturer cette affectation ?")) return;
+            try {
+                await apiFetch(`/admin/affectations/${id}/cloturer`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        motif: 'FIN_CONTRAT',
+                        dateFin: new Date().toISOString().split('T')[0]
+                    })
+                });
+                loadPostesAndAff();
+            } catch (e) { alert(e.message); }
+        };
+
+        document.getElementById('addPosteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/admin/postes', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        siteId: document.getElementById('posteSiteSelect').value,
+                        emploiId: document.getElementById('posteEmploiSelect').value,
+                        salaireBrutNegocie: document.getElementById('posteSalaireNegocie').value,
+                        montantRetenueForfaitaire: document.getElementById('posteRetenue').value
+                    })
+                });
+                document.getElementById('addPosteForm').reset();
+                loadPostesAndAff();
+            } catch (err) { alert(err.message); }
+        });
+
+        document.getElementById('addAffForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/admin/affectations', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        posteId: document.getElementById('affPosteSelect').value,
+                        agentId: document.getElementById('affAgentSelect').value,
+                        dateDebut: document.getElementById('affDateDebut').value
+                    })
+                });
+                document.getElementById('addAffForm').reset();
+                loadPostesAndAff();
+            } catch (err) { alert(err.message); }
+        });
+
+        // Load Config & Paie
+        async function loadPaieAndConfig() {
+            try {
+                // Get config
+                const config = await apiFetch('/admin/entreprise/config');
+                if (config) {
+                    document.getElementById('configTauxCotisation').value = config.tauxCotisation || '0.00';
+                    document.getElementById('configSeuilAbsence').value = config.seuilAbsenceLongueJours || '21';
+                    document.getElementById('configTauxRetenue').value = config.tauxRetenueReduite || '25.00';
+                    document.getElementById('enterpriseNameDisplay').textContent = config.nom || '—';
+                }
+
+                // Populate Dropdown for manual calcul
+                const affectations = await apiFetch('/admin/affectations');
+                const calcAffSelect = document.getElementById('calcAffSelect');
+                calcAffSelect.innerHTML = '<option value="">Choisir l\'Affectation</option>' +
+                    affectations.filter(a => a.statut === 'ACTIVE').map(a => `<option value="${a.id}">${a.agentNom} — ${a.posteLibelle}</option>`).join('');
+
+                // Populate Dropdown for client structures
+                const structures = await apiFetch('/organisation/structures');
+                const factureStructSelect = document.getElementById('factureStructSelect');
+                factureStructSelect.innerHTML = '<option value="">Choisir la Structure Cliente</option>' +
+                    structures.map(s => `<option value="${s.id}">${s.raisonSociale}</option>`).join('');
+
+                // Get bulletins
+                const bulletins = await apiFetch('/paie/bulletins');
+                const bulletinsTbody = document.getElementById('bulletinsTableBody');
+                bulletinsTbody.innerHTML = bulletins.map(b => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-3 font-bold">${b.periode}</td>
+                        <td class="p-3 font-semibold text-slate-800">${b.agentNom}</td>
+                        <td class="p-3 text-slate-600">${b.salaireNetCalcule} FCFA</td>
+                        <td class="p-3 text-slate-500">${b.joursValides} jours / abs non-just: ${b.joursAbsNonJust}</td>
+                        <td class="p-3"><span class="badge ${b.statutPaiement === 'PAYE' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">${b.statutPaiement}</span></td>
+                        <td class="p-3">
+                            ${b.statutPaiement === 'EN_ATTENTE' ? `<button onclick="payerBulletin('${b.id}')" class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded text-xs font-bold">Marquer Payé</button>` : '—'}
+                        </td>
+                    </tr>`).join('') || '<tr><td colspan="6" class="p-3 text-center text-slate-400">Aucun bulletin de paie émis.</td></tr>';
+
+                // Get factures
+                const factures = await apiFetch('/paie/factures');
+                const facturesTbody = document.getElementById('facturesTableBody');
+                facturesTbody.innerHTML = factures.map(f => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-3 text-slate-500">${f.dateEmission.split('T')[0]}</td>
+                        <td class="p-3 font-bold">${f.periode}</td>
+                        <td class="p-3 font-semibold text-slate-800">${f.clientNom}</td>
+                        <td class="p-3 text-slate-600 font-bold">${f.montantFacture} FCFA</td>
+                        <td class="p-3"><span class="badge ${f.statutPaiement === 'PAYE' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">${f.statutPaiement}</span></td>
+                        <td class="p-3">
+                            ${f.statutPaiement === 'EN_ATTENTE' ? `<button onclick="payerFacture('${f.id}')" class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded text-xs font-bold">Encaisser</button>` : '—'}
+                        </td>
+                    </tr>`).join('') || '<tr><td colspan="6" class="p-3 text-center text-slate-400">Aucune facture émise.</td></tr>';
+
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        window.payerBulletin = async function(id) {
+            try {
+                await apiFetch(`/paie/bulletins/${id}/payer`, { method: 'POST' });
+                loadPaieAndConfig();
+            } catch(e) { alert(e.message); }
+        };
+
+        window.payerFacture = async function(id) {
+            try {
+                await apiFetch(`/paie/factures/${id}/payer`, { method: 'POST' });
+                loadPaieAndConfig();
+            } catch(e) { alert(e.message); }
+        };
+
+        document.getElementById('updateConfigForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/admin/entreprise/config', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        tauxCotisation: document.getElementById('configTauxCotisation').value,
+                        seuilAbsenceLongueJours: parseInt(document.getElementById('configSeuilAbsence').value, 10),
+                        tauxRetenueReduite: document.getElementById('configTauxRetenue').value
+                    })
+                });
+                alert("Règles de paie mises à jour !");
+                loadPaieAndConfig();
+            } catch(err) { alert(err.message); }
+        });
+
+        document.getElementById('calculBulletinForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/paie/bulletins/generer', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        affectationId: document.getElementById('calcAffSelect').value,
+                        periode: document.getElementById('calcPeriode').value,
+                        joursPrevus: parseInt(document.getElementById('calcJoursPrevus').value, 10),
+                        joursValides: parseInt(document.getElementById('calcJoursValides').value, 10),
+                        joursAbsJustCourte: parseInt(document.getElementById('calcAbsJustCourte').value || '0', 10),
+                        joursAbsJustLongue: parseInt(document.getElementById('calcAbsJustLongue').value || '0', 10),
+                        joursAbsNonJust: parseInt(document.getElementById('calcAbsNonJust').value || '0', 10),
+                        joursCongePaye: parseInt(document.getElementById('calcConges').value || '0', 10)
+                    })
+                });
+                closeCalculModal();
+                document.getElementById('calculBulletinForm').reset();
+                loadPaieAndConfig();
+            } catch(err) { alert(err.message); }
+        });
+
+        document.getElementById('genererFactureForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await apiFetch('/paie/factures/generer', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        structureId: document.getElementById('factureStructSelect').value,
+                        periode: document.getElementById('facturePeriode').value,
+                        montant: parseFloat(document.getElementById('factureMontant').value),
+                        rapportUrl: document.getElementById('factureRapportUrl').value || null
+                    })
+                });
+                closeFactureModal();
+                document.getElementById('genererFactureForm').reset();
+                loadPaieAndConfig();
+            } catch(err) { alert(err.message); }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuth()) { window.location.href = '/vitrine/login.html'; return; }
+            document.getElementById('affDateDebut').value = new Date().toISOString().split('T')[0];
+            loadOverview();
+        });
+    </script>
+</body>
+</html>

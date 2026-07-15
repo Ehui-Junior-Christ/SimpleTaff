@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr" class="antialiased scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Coordonnateur — SimpleTaff</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+        .glass { background: rgba(255,255,255,0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.45); box-shadow: 0 8px 32px -8px rgba(0,0,0,0.06); }
+        .sidebar-link { display: flex; align-items: center; padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 14px; transition: all 200ms ease; color: #64748b; cursor: pointer; }
+        .sidebar-link:hover { background: #f1f5f9; color: #1e293b; }
+        .sidebar-link.active { background: #ede9fe; color: #6d28d9; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+        .input-field { width: 100%; border-radius: 10px; border: 1.5px solid #e2e8f0; background: rgba(255,255,255,0.8); padding: 10px 14px; transition: all 150ms; outline: none; font-size: 14px; }
+        .input-field:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); background: #fff; }
+        .btn-violet { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; font-weight: 700; border-radius: 12px; padding: 10px 20px; font-size: 14px; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+        .btn-violet:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(124,58,237,0.4); }
+        .stat-card { padding: 24px; border-radius: 20px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass border-r border-slate-200/60 flex flex-col justify-between hidden md:flex h-full z-10">
+        <div>
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 shadow-md flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                    </svg>
+                </div>
+                <span class="font-extrabold text-lg text-slate-900">Coordonnateur</span>
+            </div>
+            <nav class="p-4 space-y-1">
+                <div class="sidebar-link active" onclick="showTab('overview')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    Vue d'ensemble
+                </div>
+                <div class="sidebar-link" onclick="showTab('agents')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    Agents Terrain
+                </div>
+                <div class="sidebar-link" onclick="showTab('affectations')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Affectations
+                </div>
+                <div class="sidebar-link" onclick="showTab('pointages')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Pointages du jour
+                </div>
+                <div class="sidebar-link" onclick="showTab('zones')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                    Zones & Sites
+                </div>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-slate-100">
+            <button onclick="logout()" class="flex w-full items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 flex items-center justify-between px-8 border-b border-slate-200/60 bg-white/60 backdrop-blur-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">Espace Coordonnateur</h1>
+                <p class="text-xs text-slate-400">Supervision des agents & des affectations terrain</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="badge bg-violet-100 text-violet-700">COORDONNATEUR</span>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8">
+
+            <!-- ═══════════════ TAB: Vue d'ensemble ═══════════════ -->
+            <div id="tab-overview" class="tab-content active space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass stat-card">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Agents actifs</p>
+                        <div class="text-3xl font-extrabold text-slate-900 mt-1" id="statAgentsCoord">—</div>
+                    </div>
+                    <div class="glass stat-card">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Affectations actives</p>
+                        <div class="text-3xl font-extrabold text-violet-600 mt-1" id="statAffectations">—</div>
+                    </div>
+                    <div class="glass stat-card">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Pointages aujourd'hui</p>
+                        <div class="text-3xl font-extrabold text-sky-600 mt-1" id="statPointages">—</div>
+                    </div>
+                </div>
+
+                <!-- Affectations récentes -->
+                <div class="glass rounded-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="font-bold text-slate-900">Affectations récentes</h2>
+                        <button onclick="showTab('affectations')" class="text-xs text-violet-600 font-bold hover:underline">Voir tout →</button>
+                    </div>
+                    <div id="affectationsRecentes" class="divide-y divide-slate-50 text-sm">
+                        <div class="px-6 py-5 text-slate-400 text-center text-sm">Chargement…</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ TAB: Agents ═══════════════ -->
+            <div id="tab-agents" class="tab-content space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-900">Agents Terrain</h2>
+                    <button onclick="loadAgents()" class="text-xs text-violet-600 font-bold hover:underline">↻ Actualiser</button>
+                </div>
+                <div class="glass rounded-2xl overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead><tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase">
+                            <th class="px-6 py-3">Agent</th>
+                            <th class="px-6 py-3">Contact</th>
+                            <th class="px-6 py-3">Zone</th>
+                            <th class="px-6 py-3">Statut</th>
+                        </tr></thead>
+                        <tbody id="agentsTable" class="divide-y divide-slate-100 text-sm">
+                            <tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Chargement…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══════════════ TAB: Affectations ═══════════════ -->
+            <div id="tab-affectations" class="tab-content space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-900">Affectations</h2>
+                    <button onclick="loadAffectations()" class="text-xs text-violet-600 font-bold hover:underline">↻ Actualiser</button>
+                </div>
+                <div class="glass rounded-2xl overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead><tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase">
+                            <th class="px-6 py-3">Agent</th>
+                            <th class="px-6 py-3">Poste</th>
+                            <th class="px-6 py-3">Début</th>
+                            <th class="px-6 py-3">Statut</th>
+                        </tr></thead>
+                        <tbody id="affectationsTable" class="divide-y divide-slate-100 text-sm">
+                            <tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Chargement…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══════════════ TAB: Pointages ═══════════════ -->
+            <div id="tab-pointages" class="tab-content space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-900">Pointages du jour</h2>
+                    <button onclick="loadPointages()" class="text-xs text-violet-600 font-bold hover:underline">↻ Actualiser</button>
+                </div>
+                <div class="glass rounded-2xl overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead><tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase">
+                            <th class="px-6 py-3">Agent</th>
+                            <th class="px-6 py-3">Type</th>
+                            <th class="px-6 py-3">Heure</th>
+                            <th class="px-6 py-3">Site</th>
+                        </tr></thead>
+                        <tbody id="pointagesTable" class="divide-y divide-slate-100 text-sm">
+                            <tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucun pointage pour aujourd'hui.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══════════════ TAB: Zones & Sites ═══════════════ -->
+            <div id="tab-zones" class="tab-content space-y-4">
+                <h2 class="text-lg font-bold text-slate-900">Zones géographiques & Sites</h2>
+                <div id="zonesContainer" class="glass rounded-2xl p-6 text-slate-400 text-sm text-center">
+                    Chargement des zones…
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { apiFetch, logout, checkAuth } from '/shared/api.js';
+        window.logout = logout;
+
+        window.showTab = function(name) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            // Find matching sidebar link
+            const links = document.querySelectorAll('.sidebar-link');
+            links.forEach(l => {
+                if (l.getAttribute('onclick')?.includes("'" + name + "'")) l.classList.add('active');
+            });
+            // Load data for the tab
+            if (name === 'agents') loadAgents();
+            if (name === 'affectations') loadAffectations();
+            if (name === 'pointages') loadPointages();
+            if (name === 'zones') loadZones();
+        };
+
+        window.loadAgents = async function() {
+            const tbody = document.getElementById('agentsTable');
+            try {
+                const data = await apiFetch('/coordonnateur/agents');
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucun agent trouvé.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(a => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 font-semibold text-slate-900">${a.nom} ${a.prenom}</td>
+                        <td class="px-6 py-4 text-slate-500">${a.contact || '—'}</td>
+                        <td class="px-6 py-4 text-slate-500">${a.zoneNom || '—'}</td>
+                        <td class="px-6 py-4"><span class="badge ${a.statut === 'ACTIF' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">${a.statut}</span></td>
+                    </tr>`).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
+            }
+        };
+
+        window.loadAffectations = async function() {
+            const tbody = document.getElementById('affectationsTable');
+            try {
+                const data = await apiFetch('/coordonnateur/affectations');
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucune affectation.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(a => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 font-semibold text-slate-900">${a.agentNom || '—'}</td>
+                        <td class="px-6 py-4 text-slate-500">${a.posteLibelle || '—'}</td>
+                        <td class="px-6 py-4 text-slate-500">${a.dateDebut || '—'}</td>
+                        <td class="px-6 py-4"><span class="badge ${a.statut === 'ACTIVE' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}">${a.statut}</span></td>
+                    </tr>`).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
+            }
+            // Also update overview
+            document.getElementById('affectationsRecentes').innerHTML = document.getElementById('affectationsTable').innerHTML;
+        };
+
+        window.loadPointages = async function() {
+            const tbody = document.getElementById('pointagesTable');
+            try {
+                const data = await apiFetch('/coordonnateur/pointages/today');
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucun pointage pour aujourd\'hui.</td></tr>';
+                    document.getElementById('statPointages').textContent = '0';
+                    return;
+                }
+                document.getElementById('statPointages').textContent = data.length;
+                tbody.innerHTML = data.map(p => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 font-semibold text-slate-900">${p.agentNom || '—'}</td>
+                        <td class="px-6 py-4"><span class="badge ${p.typePointage === 'ENTREE' ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}">${p.typePointage}</span></td>
+                        <td class="px-6 py-4 text-slate-500">${p.heurePointage ? new Date(p.heurePointage).toLocaleTimeString('fr-FR') : '—'}</td>
+                        <td class="px-6 py-4 text-slate-500">${p.siteNom || '—'}</td>
+                    </tr>`).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
+            }
+        };
+
+        window.loadZones = async function() {
+            const container = document.getElementById('zonesContainer');
+            try {
+                const data = await apiFetch('/coordonnateur/zones');
+                if (!data || data.length === 0) {
+                    container.textContent = 'Aucune zone configurée.'; return;
+                }
+                container.innerHTML = data.map(z => `
+                    <div class="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
+                        <div class="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900 text-sm">${z.nom}</p>
+                            <p class="text-xs text-slate-400 mt-0.5">${z.perimetre || z.description || '—'}</p>
+                        </div>
+                        <span class="ml-auto badge ${z.statut === 'ACTIF' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">${z.statut}</span>
+                    </div>`).join('');
+            } catch (e) {
+                container.innerHTML = `<p class="text-red-400 text-sm">${e.message}</p>`;
+            }
+        };
+
+        async function loadOverview() {
+            try {
+                const stats = await apiFetch('/coordonnateur/stats');
+                if (stats) {
+                    document.getElementById('statAgentsCoord').textContent = stats.totalAgents ?? '—';
+                    document.getElementById('statAffectations').textContent = stats.totalAffectations ?? '—';
+                    document.getElementById('statPointages').textContent = stats.pointagesAujourdhui ?? '—';
+                }
+            } catch(e) {
+                console.error('Stats coordonnateur non disponibles', e);
+            }
+            await loadAffectations();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuth()) { window.location.href = '/vitrine/login.html'; return; }
+            loadOverview();
+        });
+    </script>
+</body>
+</html>
