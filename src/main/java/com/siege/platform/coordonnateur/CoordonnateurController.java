@@ -2,14 +2,19 @@ package com.siege.platform.coordonnateur;
 
 import com.siege.platform.agent.AgentTerrain;
 import com.siege.platform.agent.AgentTerrainRepository;
+import com.siege.platform.pointage.Pointage;
+import com.siege.platform.pointage.PointageRepository;
 import com.siege.platform.poste.Affectation;
 import com.siege.platform.poste.AffectationRepository;
+import com.siege.platform.poste.Poste;
 import com.siege.platform.zone.Zone;
 import com.siege.platform.zone.ZoneRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -20,21 +25,27 @@ public class CoordonnateurController {
     private final AgentTerrainRepository agentRepo;
     private final AffectationRepository affectationRepo;
     private final ZoneRepository zoneRepo;
+    private final PointageRepository pointageRepo;
 
     public CoordonnateurController(AgentTerrainRepository agentRepo,
                                     AffectationRepository affectationRepo,
-                                    ZoneRepository zoneRepo) {
+                                    ZoneRepository zoneRepo,
+                                    PointageRepository pointageRepo) {
         this.agentRepo = agentRepo;
         this.affectationRepo = affectationRepo;
         this.zoneRepo = zoneRepo;
+        this.pointageRepo = pointageRepo;
     }
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         Map<String, Object> stats = new HashMap<>();
+        LocalDate today = LocalDate.now();
+        LocalDateTime start = today.atStartOfDay();
+        LocalDateTime end = today.plusDays(1).atStartOfDay();
         stats.put("totalAgents", agentRepo.count());
         stats.put("totalAffectations", affectationRepo.count());
-        stats.put("pointagesAujourdhui", 0); // Sera enrichi avec la query pointage réelle
+        stats.put("pointagesAujourdhui", pointageRepo.countByDateHeureEntreeBetween(start, end));
         return ResponseEntity.ok(stats);
     }
 
@@ -74,9 +85,52 @@ public class CoordonnateurController {
     }
 
     @GetMapping("/pointages/today")
-    public ResponseEntity<List<Object>> getPointagesToday() {
-        // Retourne une liste vide pour l'instant — à connecter au PointageRepository
-        return ResponseEntity.ok(List.of());
+    public ResponseEntity<List<Map<String, Object>>> getPointagesToday() {
+        return getPointages(LocalDate.now());
+    }
+
+    @GetMapping("/pointages")
+    public ResponseEntity<List<Map<String, Object>>> getPointages(@RequestParam(required = false) LocalDate date) {
+        LocalDate selectedDate = date != null ? date : LocalDate.now();
+        LocalDateTime start = selectedDate.atStartOfDay();
+        LocalDateTime end = selectedDate.plusDays(1).atStartOfDay();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Pointage p : pointageRepo.findByDateHeureEntreeBetweenOrderByDateHeureEntreeDesc(start, end)) {
+            Affectation affectation = p.getAffectation();
+            Poste poste = affectation != null ? affectation.getPoste() : null;
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", p.getId());
+            map.put("agentNom", resolveAgentNom(affectation));
+            map.put("typePointage", p.getDateHeureSortie() == null ? "ENTREE" : "SORTIE");
+            map.put("dateHeure", p.getDateHeureSortie() != null ? p.getDateHeureSortie() : p.getDateHeureEntree());
+            map.put("dateHeureEntree", p.getDateHeureEntree());
+            map.put("dateHeureSortie", p.getDateHeureSortie());
+            map.put("siteNom", poste != null && poste.getSite() != null ? poste.getSite().getNom() : null);
+            map.put("statut", p.getStatut());
+            result.add(map);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/pointages/dates")
+    public ResponseEntity<List<Map<String, Object>>> getPointageDates() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Object[] row : pointageRepo.findPointageDatesWithCounts()) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("date", row[0] != null ? row[0].toString() : null);
+            map.put("total", row[1]);
+            result.add(map);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    private String resolveAgentNom(Affectation affectation) {
+        if (affectation == null || affectation.getAgent() == null) {
+            return null;
+        }
+        return affectation.getAgent().getNom() + " " + affectation.getAgent().getPrenom();
     }
 
     @GetMapping("/zones")
