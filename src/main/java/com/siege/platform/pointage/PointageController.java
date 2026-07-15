@@ -1,5 +1,8 @@
 package com.siege.platform.pointage;
 
+import com.siege.platform.poste.Affectation;
+import com.siege.platform.poste.Poste;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -42,28 +45,64 @@ public class PointageController {
     @GetMapping("/today")
     @PreAuthorize("hasAnyRole('COORDONNATEUR', 'EMPLOYEUR', 'ADMIN_ENTREPRISE')")
     public ResponseEntity<List<Map<String, Object>>> getPointagesToday() {
-        LocalDate today = LocalDate.now();
-        LocalDateTime start = today.atStartOfDay();
-        LocalDateTime end = today.plusDays(1).atStartOfDay();
+        return getPointagesByDate(LocalDate.now());
+    }
 
-        List<Pointage> pointages = pointageRepository.findByDateHeureEntreeBetweenOrderByDateHeureEntreeDesc(start, end);
+    @GetMapping
+    @PreAuthorize("hasAnyRole('COORDONNATEUR', 'EMPLOYEUR', 'ADMIN_ENTREPRISE')")
+    public ResponseEntity<List<Map<String, Object>>> getPointages(@RequestParam(required = false) LocalDate date) {
+        return getPointagesByDate(date != null ? date : LocalDate.now());
+    }
+
+    @GetMapping("/dates")
+    @PreAuthorize("hasAnyRole('COORDONNATEUR', 'EMPLOYEUR', 'ADMIN_ENTREPRISE')")
+    public ResponseEntity<List<Map<String, Object>>> getPointageDates() {
+        return ResponseEntity.ok(toDateSummary(pointageRepository.findPointageDatesWithCounts()));
+    }
+
+    private ResponseEntity<List<Map<String, Object>>> getPointagesByDate(LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.plusDays(1).atStartOfDay();
         List<Map<String, Object>> response = new ArrayList<>();
-        for (Pointage pointage : pointages) {
+
+        for (Pointage pointage : pointageRepository.findByDateHeureEntreeBetweenOrderByDateHeureEntreeDesc(start, end)) {
             response.add(toResponse(pointage));
         }
         return ResponseEntity.ok(response);
     }
 
+    private List<Map<String, Object>> toDateSummary(List<Object[]> rows) {
+        List<Map<String, Object>> response = new ArrayList<>();
+        for (Object[] row : rows) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("date", row[0] != null ? row[0].toString() : null);
+            map.put("total", row[1]);
+            response.add(map);
+        }
+        return response;
+    }
+
     private Map<String, Object> toResponse(Pointage pointage) {
         Map<String, Object> map = new LinkedHashMap<>();
+        Affectation affectation = pointage.getAffectation();
+        Poste poste = affectation != null ? affectation.getPoste() : null;
+
         map.put("id", pointage.getId());
-        map.put("agentNom", pointage.getAffectation().getAgent().getNom() + " " + pointage.getAffectation().getAgent().getPrenom());
+        map.put("agentNom", resolveAgentNom(affectation));
         map.put("typePointage", pointage.getDateHeureSortie() == null ? "ENTREE" : "SORTIE");
         map.put("dateHeure", pointage.getDateHeureSortie() != null ? pointage.getDateHeureSortie() : pointage.getDateHeureEntree());
         map.put("dateHeureEntree", pointage.getDateHeureEntree());
         map.put("dateHeureSortie", pointage.getDateHeureSortie());
+        map.put("siteNom", poste != null && poste.getSite() != null ? poste.getSite().getNom() : null);
         map.put("statut", pointage.getStatut());
         return map;
+    }
+
+    private String resolveAgentNom(Affectation affectation) {
+        if (affectation == null || affectation.getAgent() == null) {
+            return null;
+        }
+        return affectation.getAgent().getNom() + " " + affectation.getAgent().getPrenom();
     }
 
     private String safeMessage(Exception e) {

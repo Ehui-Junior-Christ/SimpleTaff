@@ -37,23 +37,23 @@
                 <span class="font-extrabold text-lg text-slate-900">Coordonnateur</span>
             </div>
             <nav class="p-4 space-y-1">
-                <div class="sidebar-link active" onclick="showTab('overview')">
+                <div class="sidebar-link active" data-tab="overview" onclick="showTab('overview')">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                     Vue d'ensemble
                 </div>
-                <div class="sidebar-link" onclick="showTab('agents')">
+                <div class="sidebar-link" data-tab="agents" onclick="showTab('agents')">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     Agents Terrain
                 </div>
-                <div class="sidebar-link" onclick="showTab('affectations')">
+                <div class="sidebar-link" data-tab="affectations" onclick="showTab('affectations')">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     Affectations
                 </div>
-                <div class="sidebar-link" onclick="showTab('pointages')">
+                <div class="sidebar-link" data-tab="pointages" onclick="showTab('pointages')">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Pointages du jour
                 </div>
-                <div class="sidebar-link" onclick="showTab('zones')">
+                <div class="sidebar-link" data-tab="zones" onclick="showTab('zones')">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
                     Zones & Sites
                 </div>
@@ -154,9 +154,15 @@
 
             <!-- ═══════════════ TAB: Pointages ═══════════════ -->
             <div id="tab-pointages" class="tab-content space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-bold text-slate-900">Pointages du jour</h2>
-                    <button onclick="loadPointages()" class="text-xs text-violet-600 font-bold hover:underline">↻ Actualiser</button>
+                <div class="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+                    <h2 class="text-lg font-bold text-slate-900">Pointages par date</h2>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="coordPointageDate" class="input-field w-auto">
+                        <button onclick="loadPointages()" class="text-xs text-violet-600 font-bold hover:underline">Actualiser</button>
+                    </div>
+                </div>
+                <div id="coordPointageDates" class="glass rounded-2xl p-4 flex flex-wrap gap-2 text-sm">
+                    <span class="text-slate-400">Chargement des jours enregistrés...</span>
                 </div>
                 <div class="glass rounded-2xl overflow-hidden">
                     <table class="w-full text-left">
@@ -188,23 +194,24 @@
         import { apiFetch, logout, checkAuth } from '/shared/api.js';
         window.logout = logout;
 
-        window.showTab = function(name) {
+        function showTab(name) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
             document.getElementById('tab-' + name).classList.add('active');
-            // Find matching sidebar link
-            const links = document.querySelectorAll('.sidebar-link');
-            links.forEach(l => {
-                if (l.getAttribute('onclick')?.includes("'" + name + "'")) l.classList.add('active');
+            document.querySelectorAll('.sidebar-link').forEach(l => {
+                if (l.dataset.tab === name || l.getAttribute('onclick')?.includes("'" + name + "'")) l.classList.add('active');
             });
-            // Load data for the tab
             if (name === 'agents') loadAgents();
             if (name === 'affectations') loadAffectations();
-            if (name === 'pointages') loadPointages();
+            if (name === 'pointages') {
+                loadPointageDates();
+                loadPointages();
+            }
             if (name === 'zones') loadZones();
-        };
+        }
+        window.showTab = showTab;
 
-        window.loadAgents = async function() {
+        async function loadAgents() {
             const tbody = document.getElementById('agentsTable');
             try {
                 const data = await apiFetch('/coordonnateur/agents');
@@ -222,9 +229,10 @@
             } catch (e) {
                 tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
             }
-        };
+        }
+        window.loadAgents = loadAgents;
 
-        window.loadAffectations = async function() {
+        async function loadAffectations() {
             const tbody = document.getElementById('affectationsTable');
             try {
                 const data = await apiFetch('/coordonnateur/affectations');
@@ -244,14 +252,16 @@
             }
             // Also update overview
             document.getElementById('affectationsRecentes').innerHTML = document.getElementById('affectationsTable').innerHTML;
-        };
+        }
+        window.loadAffectations = loadAffectations;
 
-        window.loadPointages = async function() {
+        async function loadPointages() {
             const tbody = document.getElementById('pointagesTable');
+            const selectedDate = document.getElementById('coordPointageDate')?.value || new Date().toISOString().slice(0, 10);
             try {
-                const data = await apiFetch('/coordonnateur/pointages/today');
+                const data = await apiFetch(`/coordonnateur/pointages?date=${selectedDate}`);
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucun pointage pour aujourd\'hui.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucun pointage pour cette date.</td></tr>';
                     document.getElementById('statPointages').textContent = '0';
                     return;
                 }
@@ -260,15 +270,50 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-6 py-4 font-semibold text-slate-900">${p.agentNom || '—'}</td>
                         <td class="px-6 py-4"><span class="badge ${p.typePointage === 'ENTREE' ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}">${p.typePointage}</span></td>
-                        <td class="px-6 py-4 text-slate-500">${p.heurePointage ? new Date(p.heurePointage).toLocaleTimeString('fr-FR') : '—'}</td>
+                        <td class="px-6 py-4 text-slate-500">${p.dateHeure ? new Date(p.dateHeure).toLocaleTimeString('fr-FR') : '—'}</td>
                         <td class="px-6 py-4 text-slate-500">${p.siteNom || '—'}</td>
                     </tr>`).join('');
             } catch (e) {
                 tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
             }
-        };
+        }
+        window.loadPointages = loadPointages;
 
-        window.loadZones = async function() {
+        async function loadPointageDates() {
+            const container = document.getElementById('coordPointageDates');
+            if (!container) return;
+            try {
+                const dates = await apiFetch('/coordonnateur/pointages/dates');
+                if (!dates || dates.length === 0) {
+                    container.innerHTML = '<span class="text-slate-400">Aucun jour enregistré pour le moment.</span>';
+                    return;
+                }
+                const selectedDate = document.getElementById('coordPointageDate')?.value;
+                container.innerHTML = dates.map(d => `
+                    <button type="button" onclick="selectCoordPointageDate('${d.date}')"
+                        class="px-3 py-2 rounded-xl text-xs font-bold transition-colors ${d.date === selectedDate ? 'bg-violet-600 text-white' : 'bg-white text-slate-600 hover:bg-violet-50 hover:text-violet-700'}">
+                        ${formatDateLabel(d.date)} (${d.total})
+                    </button>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = `<span class="text-red-400">${e.message}</span>`;
+            }
+        }
+        window.loadPointageDates = loadPointageDates;
+
+        function selectCoordPointageDate(date) {
+            const input = document.getElementById('coordPointageDate');
+            if (input) input.value = date;
+            loadPointages();
+            loadPointageDates();
+        }
+        window.selectCoordPointageDate = selectCoordPointageDate;
+
+        function formatDateLabel(value) {
+            return value ? new Date(`${value}T00:00:00`).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Date inconnue';
+        }
+
+        async function loadZones() {
             const container = document.getElementById('zonesContainer');
             try {
                 const data = await apiFetch('/coordonnateur/zones');
@@ -289,7 +334,8 @@
             } catch (e) {
                 container.innerHTML = `<p class="text-red-400 text-sm">${e.message}</p>`;
             }
-        };
+        }
+        window.loadZones = loadZones;
 
         async function loadOverview() {
             try {
@@ -307,6 +353,17 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!checkAuth()) { window.location.href = '/vitrine/login.html'; return; }
+            document.querySelectorAll('.sidebar-link[data-tab]').forEach(link => {
+                link.addEventListener('click', () => showTab(link.dataset.tab));
+            });
+            const pointageDate = document.getElementById('coordPointageDate');
+            if (pointageDate) {
+                pointageDate.value = new Date().toISOString().slice(0, 10);
+                pointageDate.addEventListener('change', () => {
+                    loadPointages();
+                    loadPointageDates();
+                });
+            }
             loadOverview();
         });
     </script>
