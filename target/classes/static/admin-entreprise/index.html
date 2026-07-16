@@ -58,6 +58,16 @@
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Configuration & Paie
                 </div>
+                <div class="sidebar-link" onclick="showTab('contrats')">Contrats</div>
+                <div class="sidebar-link" onclick="showTab('missions')">Missions</div>
+                <div class="sidebar-link" onclick="showTab('pointage')">Pointage</div>
+                <div class="sidebar-link" onclick="showTab('presences')">PrÃ©sences</div>
+                <div class="sidebar-link" onclick="showTab('materiel')">MatÃ©riel</div>
+                <div class="sidebar-link" onclick="showTab('conges')">CongÃ©s & Absences</div>
+                <div class="sidebar-link" onclick="showTab('disciplinaire')">Disciplinaire</div>
+                <div class="sidebar-link" onclick="showTab('evaluations')">Ã‰valuations</div>
+                <div class="sidebar-link" onclick="showTab('rapports')">Rapports</div>
+                <div class="sidebar-link" onclick="showTab('audit')">Audit</div>
             </nav>
         </div>
         <div class="p-4 border-t border-slate-100 bg-slate-50/50">
@@ -227,6 +237,17 @@
                                     <input type="text" id="agentNom" required class="input-field" placeholder="Nom">
                                     <input type="text" id="agentPrenom" required class="input-field" placeholder="Prénom">
                                     <input type="text" id="agentContact" required class="input-field" placeholder="Contact (+225...)">
+                                    <input type="text" id="agentTelephoneSecondaire" class="input-field" placeholder="Telephone secondaire">
+                                    <select id="agentSituationMatrimoniale" class="input-field">
+                                        <option value="">Situation matrimoniale</option>
+                                        <option value="CELIBATAIRE">Celibataire</option>
+                                        <option value="MARIE">Marie(e)</option>
+                                        <option value="DIVORCE">Divorce(e)</option>
+                                        <option value="VEUF">Veuf/Veuve</option>
+                                    </select>
+                                    <input type="number" id="agentNombreEnfants" class="input-field" placeholder="Nombre d'enfants">
+                                    <input type="text" id="agentContactUrgenceNom" class="input-field" placeholder="Personne a contacter">
+                                    <input type="text" id="agentContactUrgenceTelephone" class="input-field" placeholder="Telephone urgence">
                                     <select id="agentZoneSelect" required class="input-field">
                                         <option value="">Sélectionner sa zone</option>
                                     </select>
@@ -500,6 +521,267 @@
                 </div>
             </div>
 
+            <div id="tab-contrats" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">Contrats & alertes expirations</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="text-xs font-bold text-slate-500 uppercase">Liste des contrats</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Agent</th>
+                                    <th class="p-2">Type</th>
+                                    <th class="p-2">Date début</th>
+                                    <th class="p-2">Date fin</th>
+                                    <th class="p-2">Structure cliente</th>
+                                    <th class="p-2">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contratsTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="6" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-missions" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">Missions terrain</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="text-xs font-bold text-slate-500 uppercase">Liste des missions</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Agent</th>
+                                    <th class="p-2">Titre</th>
+                                    <th class="p-2">Planning début</th>
+                                    <th class="p-2">Planning fin</th>
+                                    <th class="p-2">Statut</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="missionsTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="6" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-pointage" class="tab-content space-y-6">
+                <!-- NOTE: Cet onglet affiche un aperçu, pas un scanner. Le scanner utilise /api/pointages/scanner -->
+                <h2 class="text-lg font-bold text-slate-900">Pointage multi-mode</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="text-xs font-bold text-slate-500 uppercase">Aperçu du pointage (aujourd'hui)</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Agent</th>
+                                    <th class="p-2">Type</th>
+                                    <th class="p-2">Date/Heure</th>
+                                    <th class="p-2">Mode</th>
+                                    <th class="p-2">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pointagesTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-presences" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">PrÃ©sences mensuelles</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div class="md:col-span-4">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Mois (YYYY-MM)</label>
+                            <input type="month" id="presencesMois" class="input-field" />
+                        </div>
+                        <div class="md:col-span-4">
+                            <button onclick="exportPresences('xlsx')" class="btn-brand w-full py-2 text-xs">Exporter Excel</button>
+                        </div>
+                        <div class="md:col-span-4">
+                            <button onclick="exportPresences('pdf')" class="btn-brand w-full py-2 text-xs">Exporter PDF</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Agent</th>
+                                    <th class="p-2">Date</th>
+                                    <th class="p-2">Arrivée</th>
+                                    <th class="p-2">Départ</th>
+                                    <th class="p-2">Retard</th>
+                                </tr>
+                            </thead>
+                            <tbody id="presencesTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="p-3 text-center text-slate-400">Sélectionnez un mois.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-materiel" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">Parc matÃ©riel</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div class="md:col-span-4">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Catégorie</label>
+                            <input type="text" id="materielCategorie" class="input-field" placeholder="(optionnel)" />
+                        </div>
+                        <div class="md:col-span-8">
+                            <button onclick="loadMateriel(true)" class="btn-brand w-full py-2 text-xs">Charger</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Libellé</th>
+                                    <th class="p-2">Catégorie</th>
+                                    <th class="p-2">Statut</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="materielTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="4" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-conges" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">CongÃ©s & absences</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Agent</th>
+                                    <th class="p-2">Type</th>
+                                    <th class="p-2">Début</th>
+                                    <th class="p-2">Fin</th>
+                                    <th class="p-2">Statut</th>
+                                    <th class="p-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="congesTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="6" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-disciplinaire" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">Sanctions disciplinaires</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Agent</th>
+                                    <th class="p-2">Type</th>
+                                    <th class="p-2">Décision</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sanctionsTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="3" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-evaluations" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">Ã‰valuations</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Agent</th>
+                                    <th class="p-2">Année</th>
+                                    <th class="p-2">Score total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="evaluationsTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="3" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-rapports" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">Rapports & exports</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div class="md:col-span-4">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Mois (YYYY-MM)</label>
+                            <input type="month" id="rapportsMois" class="input-field" />
+                        </div>
+                        <div class="md:col-span-8">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <button onclick="exportRapport('pointages','pdf')" class="btn-brand w-full py-2 text-xs">Pointages PDF</button>
+                                <button onclick="exportRapport('presences','xlsx')" class="btn-brand w-full py-2 text-xs">Presences Excel</button>
+                                <button onclick="exportRapport('facturation','pdf')" class="btn-brand w-full py-2 text-xs">Facturation PDF</button>
+                                <button onclick="loadRapports()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl text-xs transition-colors w-full md:col-span-1">Charger aperçu</button>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-slate-500">Aperçu JSON via GET /api/rapports/<type>?mois=...</div>
+                    <pre id="rapportsPreview" class="text-xs bg-slate-50 border rounded p-3 overflow-auto text-slate-700">—</pre>
+                </div>
+            </div>
+
+            <div id="tab-audit" class="tab-content space-y-6">
+                <h2 class="text-lg font-bold text-slate-900">Journal d'audit</h2>
+                <div class="glass rounded-2xl p-5 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div class="md:col-span-4">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Date début</label>
+                            <input type="date" id="auditDateDebut" class="input-field" />
+                        </div>
+                        <div class="md:col-span-4">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Date fin</label>
+                            <input type="date" id="auditDateFin" class="input-field" />
+                        </div>
+                        <div class="md:col-span-4">
+                            <button onclick="loadAudit()" class="btn-brand w-full py-2 text-xs">Charger</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold">
+                                    <th class="p-2">Date</th>
+                                    <th class="p-2">Action</th>
+                                    <th class="p-2">Utilisateur</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="3" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
     </main>
 
@@ -598,6 +880,17 @@
             if (name === 'clients') loadClients();
             if (name === 'postes') loadPostesAndAff();
             if (name === 'paie') loadPaieAndConfig();
+
+            if (name === 'contrats') loadContrats();
+            if (name === 'missions') loadMissions();
+            if (name === 'pointage') loadPointages();
+            if (name === 'presences') loadPresences();
+            if (name === 'materiel') loadMateriel();
+            if (name === 'conges') loadConges();
+            if (name === 'disciplinaire') loadDisciplinaire();
+            if (name === 'evaluations') loadEvaluations();
+            if (name === 'rapports') loadRapports();
+            if (name === 'audit') loadAudit();
         };
 
         // QR Code Modal Helper
@@ -816,6 +1109,11 @@
                         nom: document.getElementById('agentNom').value,
                         prenom: document.getElementById('agentPrenom').value,
                         contact: document.getElementById('agentContact').value,
+                        telephoneSecondaire: document.getElementById('agentTelephoneSecondaire').value,
+                        situationMatrimoniale: document.getElementById('agentSituationMatrimoniale').value,
+                        nombreEnfants: document.getElementById('agentNombreEnfants').value,
+                        contactUrgenceNom: document.getElementById('agentContactUrgenceNom').value,
+                        contactUrgenceTelephone: document.getElementById('agentContactUrgenceTelephone').value,
                         zoneId: document.getElementById('agentZoneSelect').value
                     })
                 });
@@ -1203,6 +1501,250 @@
             document.getElementById('affDateDebut').value = new Date().toISOString().split('T')[0];
             loadOverview();
         });
+
+        function safeRenderTbody(tbody, html) {
+            if (!tbody) return;
+            tbody.innerHTML = html;
+        }
+
+        async function loadContrats() {
+            try {
+                const contrats = await apiFetch('/contrats');
+                safeRenderTbody(document.getElementById('contratsTableBody'),
+                    (contrats || []).map(c => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 font-bold">${c.agentNom || '—'}</td>
+                            <td class="p-2 text-slate-500">${c.type || '—'}</td>
+                            <td class="p-2 text-slate-500">${c.dateDebut || '—'}</td>
+                            <td class="p-2 text-slate-500">${c.dateFin || '—'}</td>
+                            <td class="p-2 text-slate-500">${c.structureCliente || '—'}</td>
+                            <td class="p-2"><span class="badge ${c.statut === 'ACTIF' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}">${c.statut || '—'}</span></td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="6" class="p-3 text-center text-slate-400">Aucun contrat.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('contratsTableBody'), '<tr><td colspan="6" class="p-3 text-center text-red-500">Erreur chargement contrats</td></tr>');
+            }
+        }
+
+        async function loadMissions() {
+            try {
+                const missions = await apiFetch('/missions');
+                safeRenderTbody(document.getElementById('missionsTableBody'),
+                    (missions || []).map(m => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 font-bold">${m.agentNom || '—'}</td>
+                            <td class="p-2 text-slate-500">${m.titre || '—'}</td>
+                            <td class="p-2 text-slate-500">${m.planningDebut || '—'}</td>
+                            <td class="p-2 text-slate-500">${m.planningFin || '—'}</td>
+                            <td class="p-2"><span class="badge bg-slate-100 text-slate-600">${m.statut || '—'}</span></td>
+                            <td class="p-2 text-slate-500">—</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="6" class="p-3 text-center text-slate-400">Aucune mission.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('missionsTableBody'), '<tr><td colspan="6" class="p-3 text-center text-red-500">Erreur chargement missions</td></tr>');
+            }
+        }
+
+        async function loadPointages() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const pointages = await apiFetch('/pointages/today');
+                safeRenderTbody(document.getElementById('pointagesTableBody'),
+                    (pointages || []).map(p => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 font-bold">${p.agentNom || '—'}</td>
+                            <td class="p-2 text-slate-500">${p.typePointage || '—'}</td>
+                            <td class="p-2 text-slate-500">${p.dateHeure || '—'}</td>
+                            <td class="p-2 text-slate-500">${p.mode || '—'}</td>
+                            <td class="p-2"><span class="badge bg-slate-100 text-slate-600">${p.statut || '—'}</span></td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="5" class="p-3 text-center text-slate-400">Aucun pointage aujourd\'hui.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('pointagesTableBody'), '<tr><td colspan="5" class="p-3 text-center text-red-500">Erreur chargement pointages</td></tr>');
+            }
+        }
+
+        async function loadPresences() {
+            try {
+                const mois = document.getElementById('presencesMois')?.value;
+                if (!mois) {
+                    safeRenderTbody(document.getElementById('presencesTableBody'), '<tr><td colspan="5" class="p-3 text-center text-slate-400">Sélectionnez un mois.</td></tr>');
+                    return;
+                }
+                const presences = await apiFetch('/api/presences?mois=' + mois);
+                safeRenderTbody(document.getElementById('presencesTableBody'),
+                    (presences || []).map(p => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 font-bold">${p.agentNom || '—'}</td>
+                            <td class="p-2 text-slate-500">${p.date || '—'}</td>
+                            <td class="p-2 text-slate-500">${p.heureArrivee || '—'}</td>
+                            <td class="p-2 text-slate-500">${p.heureDepart || '—'}</td>
+                            <td class="p-2">${p.retard ? '<span class="badge bg-red-100 text-red-700">RETARD</span>' : '<span class="badge bg-green-100 text-green-700">OK</span>'}</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="5" class="p-3 text-center text-slate-400">Aucune présence.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('presencesTableBody'), '<tr><td colspan="5" class="p-3 text-center text-red-500">Erreur chargement présences</td></tr>');
+            }
+        }
+
+        window.exportPresences = async function(format) {
+            try {
+                const mois = document.getElementById('presencesMois')?.value;
+                if (!mois) { alert('Sélectionnez un mois'); return; }
+                window.location.href = `/api/presences/export?mois=${encodeURIComponent(mois)}&format=${encodeURIComponent(format)}`;
+            } catch (e) {
+                console.error(e);
+                alert(e.message);
+            }
+        };
+
+        async function loadMateriel(withFilter) {
+            try {
+                const cat = document.getElementById('materielCategorie')?.value?.trim();
+                const url = cat && withFilter ? `/materiels?categorie=${encodeURIComponent(cat)}` : '/materiels';
+                const materiels = await apiFetch(url);
+                safeRenderTbody(document.getElementById('materielTableBody'),
+                    (materiels || []).map(m => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 font-bold">${m.libelle || m.nom || '—'}</td>
+                            <td class="p-2 text-slate-500">${m.categorie || '—'}</td>
+                            <td class="p-2 text-slate-500">${m.statut || '—'}</td>
+                            <td class="p-2 text-slate-500">—</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Aucun matériel.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('materielTableBody'), '<tr><td colspan="4" class="p-3 text-center text-red-500">Erreur chargement matériel</td></tr>');
+            }
+        }
+
+        async function loadConges() {
+            try {
+                const conges = await apiFetch('/api/conges');
+                safeRenderTbody(document.getElementById('congesTableBody'),
+                    (conges || []).map(c => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 font-bold">${c.agent?.nom ? c.agent.nom + ' ' + c.agent.prenom : (c.agentNom || '—')}</td>
+                            <td class="p-2 text-slate-500">${c.type || '—'}</td>
+                            <td class="p-2 text-slate-500">${c.dateDebut || '—'}</td>
+                            <td class="p-2 text-slate-500">${c.dateFin || '—'}</td>
+                            <td class="p-2"><span class="badge bg-slate-100 text-slate-600">${c.statut || '—'}</span></td>
+                            <td class="p-2 text-slate-500">—</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="6" class="p-3 text-center text-slate-400">Aucun congé.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('congesTableBody'), '<tr><td colspan="6" class="p-3 text-center text-red-500">Erreur chargement congés</td></tr>');
+            }
+        }
+
+        async function loadDisciplinaire() {
+            try {
+                const sanctions = await apiFetch('/disciplinaire/sanctions');
+                safeRenderTbody(document.getElementById('sanctionsTableBody'),
+                    (sanctions || []).map(s => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 font-bold">${s.agent?.nom ? s.agent.nom + ' ' + s.agent.prenom : (s.agentNom || '—')}</td>
+                            <td class="p-2 text-slate-500">${s.type || '—'}</td>
+                            <td class="p-2 text-slate-500">${s.dateFin || s.decisionUrl || '—'}</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="3" class="p-3 text-center text-slate-400">Aucune sanction.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('sanctionsTableBody'), '<tr><td colspan="3" class="p-3 text-center text-red-500">Erreur chargement sanctions</td></tr>');
+            }
+        }
+
+        async function loadEvaluations() {
+            try {
+                const evals = await apiFetch('/evaluations');
+                safeRenderTbody(document.getElementById('evaluationsTableBody'),
+                    (evals || []).map(ev => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 font-bold">${ev.agent?.nom ? ev.agent.nom + ' ' + ev.agent.prenom : (ev.agentNom || '—')}</td>
+                            <td class="p-2 text-slate-500">${ev.annee || (ev.dateEvaluation ? ev.dateEvaluation.substring(0,4) : '—')}</td>
+                            <td class="p-2 text-slate-500">${ev.scoreTotal || ev.scoreTotalCalcule || '—'}</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="3" class="p-3 text-center text-slate-400">Aucune évaluation.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('evaluationsTableBody'), '<tr><td colspan="3" class="p-3 text-center text-red-500">Erreur chargement évaluations</td></tr>');
+            }
+        }
+
+        async function loadRapports() {
+            try {
+                const mois = document.getElementById('rapportsMois')?.value;
+                if (!mois) {
+                    document.getElementById('rapportsPreview').textContent = 'Sélectionnez un mois pour charger un rapport.';
+                    return;
+                }
+                const payload = await apiFetch('/api/rapports/pointages?mois=' + mois);
+                document.getElementById('rapportsPreview').textContent = JSON.stringify(payload, null, 2);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('rapportsPreview').textContent = 'Erreur chargement rapports';
+            }
+        }
+
+        window.exportRapport = async function(type, format) {
+            try {
+                const mois = document.getElementById('rapportsMois')?.value;
+                if (!mois) { alert('Sélectionnez un mois'); return; }
+                window.location.href = `/api/rapports/${type}/export?format=${encodeURIComponent(format)}&mois=${encodeURIComponent(mois)}`;
+            } catch (e) {
+                console.error(e);
+                alert(e.message);
+            }
+        };
+
+        async function loadAudit() {
+            try {
+                const dateDebut = document.getElementById('auditDateDebut')?.value;
+                const dateFin = document.getElementById('auditDateFin')?.value;
+                const q = new URLSearchParams();
+                if (dateDebut) q.set('dateDebut', dateDebut);
+                if (dateFin) q.set('dateFin', dateFin);
+                const logs = await apiFetch('/audit?' + q.toString());
+                safeRenderTbody(document.getElementById('auditTableBody'),
+                    (logs || []).map(l => `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2 text-slate-500">${l.reeLe?.toString?.() || l.date?.toString?.() || (l.creeLe ? l.creeLe.toString() : '—')}</td>
+                            <td class="p-2 text-slate-500">${l.action || l.type || '—'}</td>
+                            <td class="p-2 font-bold">${l.utilisateur || l.username || '—'}</td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="3" class="p-3 text-center text-slate-400">Aucun log.</td></tr>'
+                );
+            } catch (e) {
+                console.error(e);
+                safeRenderTbody(document.getElementById('auditTableBody'), '<tr><td colspan="3" class="p-3 text-center text-red-500">Erreur chargement audit</td></tr>');
+            }
+        }
+
+        // expose global
+        window.loadContrats = loadContrats;
+        window.loadMissions = loadMissions;
+        window.loadPointages = loadPointages;
+        window.loadPresences = loadPresences;
+        window.loadMateriel = loadMateriel;
+        window.loadConges = loadConges;
+        window.loadDisciplinaire = loadDisciplinaire;
+        window.loadEvaluations = loadEvaluations;
+        window.loadRapports = loadRapports;
+        window.loadAudit = loadAudit;
+
     </script>
 </body>
 </html>

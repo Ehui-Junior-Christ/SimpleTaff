@@ -2,6 +2,7 @@ package com.siege.platform.poste;
 
 import com.siege.platform.agent.AgentTerrain;
 import com.siege.platform.entreprise.Entreprise;
+import com.siege.platform.utilisateur.Utilisateur;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,6 +38,19 @@ public class Affectation {
     private LocalDate dateDebutOccupation;
 
     private LocalDate dateFinOccupation;
+
+    private String commune;
+
+    private String zoneOperationnelle;
+
+    private String motifAffectation;
+
+    @Column(length = 500)
+    private String decisionUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsable_validant_id")
+    private Utilisateur responsableValidant;
 
     private String motifFin;
 

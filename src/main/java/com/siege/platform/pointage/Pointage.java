@@ -10,6 +10,7 @@ import org.hibernate.annotations.Filter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "pointage")
@@ -38,6 +39,35 @@ public class Pointage {
     private LocalDateTime dateHeureEntree;
 
     private LocalDateTime dateHeureSortie;
+
+    private String mode = "QR_CODE";
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal latitudeEntree;
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal longitudeEntree;
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal latitudeSortie;
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal longitudeSortie;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal distanceParcourueKm = BigDecimal.ZERO;
+
+    private Integer dureeMinutes;
+
+    @Column(columnDefinition = "TEXT")
+    private String anomalie;
+
+    @Column(length = 500)
+    private String selfieUrl;
+
+    private String identifiantNfc;
+
+    private String sourceBiometrie;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "valide_par_employeur_id")

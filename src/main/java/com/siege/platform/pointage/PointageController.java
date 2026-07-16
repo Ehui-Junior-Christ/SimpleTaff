@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,6 +37,8 @@ public class PointageController {
         
         try {
             Pointage pointage = pointageService.scannerCarte(cardId, payload.get("typePointage"));
+            applyPointageExtras(pointage, payload);
+            pointageRepository.save(pointage);
             return ResponseEntity.ok(toResponse(pointage));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", safeMessage(e)));
@@ -93,9 +96,39 @@ public class PointageController {
         map.put("dateHeure", pointage.getDateHeureSortie() != null ? pointage.getDateHeureSortie() : pointage.getDateHeureEntree());
         map.put("dateHeureEntree", pointage.getDateHeureEntree());
         map.put("dateHeureSortie", pointage.getDateHeureSortie());
+        map.put("mode", pointage.getMode());
+        map.put("latitudeEntree", pointage.getLatitudeEntree());
+        map.put("longitudeEntree", pointage.getLongitudeEntree());
+        map.put("latitudeSortie", pointage.getLatitudeSortie());
+        map.put("longitudeSortie", pointage.getLongitudeSortie());
+        map.put("distanceParcourueKm", pointage.getDistanceParcourueKm());
+        map.put("dureeMinutes", pointage.getDureeMinutes());
+        map.put("anomalie", pointage.getAnomalie());
         map.put("siteNom", poste != null && poste.getSite() != null ? poste.getSite().getNom() : null);
         map.put("statut", pointage.getStatut());
         return map;
+    }
+
+    private void applyPointageExtras(Pointage pointage, Map<String, String> payload) {
+        if (payload.get("mode") != null) pointage.setMode(payload.get("mode"));
+        if (payload.get("anomalie") != null) pointage.setAnomalie(payload.get("anomalie"));
+        if (payload.get("selfieUrl") != null) pointage.setSelfieUrl(payload.get("selfieUrl"));
+        if (payload.get("identifiantNfc") != null) pointage.setIdentifiantNfc(payload.get("identifiantNfc"));
+        if (payload.get("sourceBiometrie") != null) pointage.setSourceBiometrie(payload.get("sourceBiometrie"));
+        if (payload.get("latitude") != null && payload.get("longitude") != null) {
+            BigDecimal lat = new BigDecimal(payload.get("latitude"));
+            BigDecimal lng = new BigDecimal(payload.get("longitude"));
+            if (pointage.getDateHeureSortie() == null) {
+                pointage.setLatitudeEntree(lat);
+                pointage.setLongitudeEntree(lng);
+            } else {
+                pointage.setLatitudeSortie(lat);
+                pointage.setLongitudeSortie(lng);
+            }
+        }
+        if (pointage.getDateHeureSortie() != null && pointage.getDateHeureEntree() != null) {
+            pointage.setDureeMinutes((int) java.time.Duration.between(pointage.getDateHeureEntree(), pointage.getDateHeureSortie()).toMinutes());
+        }
     }
 
     private String resolveAgentNom(Affectation affectation) {

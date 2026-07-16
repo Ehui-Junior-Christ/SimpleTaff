@@ -40,6 +40,18 @@ public class AgentTerrain {
     @Column(nullable = false)
     private String contact;
 
+    private String telephoneSecondaire;
+
+    private String situationMatrimoniale;
+
+    private Integer nombreEnfants = 0;
+
+    private String contactUrgenceNom;
+
+    private String contactUrgenceTelephone;
+
+    private String contactUrgenceLien;
+
     @Column(nullable = false)
     private String statut;
 
