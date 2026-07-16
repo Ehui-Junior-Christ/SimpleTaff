@@ -24,7 +24,14 @@ public class PieceJustificative {
     @Column(nullable = false)
     private String type;
 
+    private LocalDate dateEmission;
+
     private LocalDate dateExpiration;
+
+    @Column(nullable = false)
+    private String statut = "VALIDE";
+
+    private LocalDate alerteEnvoyeeLe;
 
     @Column(nullable = false, length = 500)
     private String urlDocument;

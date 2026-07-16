@@ -47,6 +47,12 @@ public class AgentTerrainController {
             map.put("nom", a.getNom());
             map.put("prenom", a.getPrenom());
             map.put("contact", a.getContact());
+            map.put("telephoneSecondaire", a.getTelephoneSecondaire());
+            map.put("situationMatrimoniale", a.getSituationMatrimoniale());
+            map.put("nombreEnfants", a.getNombreEnfants());
+            map.put("contactUrgenceNom", a.getContactUrgenceNom());
+            map.put("contactUrgenceTelephone", a.getContactUrgenceTelephone());
+            map.put("contactUrgenceLien", a.getContactUrgenceLien());
             map.put("statut", a.getStatut());
             map.put("zoneNom", a.getZone() != null ? a.getZone().getNom() : "—");
             map.put("codeQr", agentQrMap.getOrDefault(a.getId(), a.getId().toString()));
@@ -67,8 +73,7 @@ public class AgentTerrainController {
         }
 
         try {
-            UUID zoneId = UUID.fromString(zoneIdStr);
-            AgentTerrain agent = agentTerrainService.creerAgent(nom, prenom, contact, zoneId);
+            AgentTerrain agent = agentTerrainService.creerAgentDepuisPayload(payload);
             return ResponseEntity.ok(Map.of(
                 "message", "Agent créé avec succès !",
                 "agentId", agent.getId()
@@ -81,5 +86,15 @@ public class AgentTerrainController {
     @GetMapping("/zones")
     public ResponseEntity<List<Zone>> getZones() {
         return ResponseEntity.ok(zoneRepository.findAll());
+    }
+
+    @GetMapping("/{id}/fiche")
+    public ResponseEntity<Map<String, Object>> genererFicheAgent(@PathVariable UUID id,
+                                                                 @RequestParam(defaultValue = "pdf") String format) {
+        return ResponseEntity.ok(Map.of(
+                "message", "Export fiche agent pret.",
+                "format", format,
+                "url", "/exports/agents/" + id + "/fiche." + format
+        ));
     }
 }

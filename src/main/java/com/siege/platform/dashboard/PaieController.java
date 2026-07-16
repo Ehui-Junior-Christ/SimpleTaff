@@ -65,6 +65,7 @@ public class PaieController {
             m.put("agentNom", b.getAgent() != null ? b.getAgent().getNom() + " " + b.getAgent().getPrenom() : "—");
             m.put("salaireBrutEffectif", b.getSalaireBrutEffectif());
             m.put("salaireNetCalcule", b.getSalaireNetCalcule());
+            m.put("totalPrimes", b.getTotalPrimes());
             m.put("statutPaiement", b.getStatutPaiement());
             m.put("dateCloture", b.getDateCloture() != null ? b.getDateCloture().toString() : "—");
             m.put("joursValides", b.getJoursValides());
@@ -92,6 +93,8 @@ public class PaieController {
             BulletinDePaie bulletin = paieCalculService.genererBulletin(
                     affectation, periode, joursPrevus, joursValides,
                     joursAbsJustCourte, joursAbsJustLongue, joursAbsNonJust, joursCongePaye);
+            appliquerPrimes(bulletin, payload);
+            bulletinRepo.save(bulletin);
 
             return ResponseEntity.ok(Map.of(
                     "message", "Bulletin généré !",
@@ -101,6 +104,35 @@ public class PaieController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    private void appliquerPrimes(BulletinDePaie bulletin, Map<String, Object> payload) {
+        java.math.BigDecimal transport = decimal(payload.get("primeTransport"));
+        java.math.BigDecimal logement = decimal(payload.get("primeLogement"));
+        java.math.BigDecimal terrain = decimal(payload.get("primeTerrain"));
+        java.math.BigDecimal communication = decimal(payload.get("primeCommunication"));
+        java.math.BigDecimal panier = decimal(payload.get("primePanier"));
+        java.math.BigDecimal anciennete = decimal(payload.get("primeAnciennete"));
+        java.math.BigDecimal exceptionnelle = decimal(payload.get("primeExceptionnelle"));
+        java.math.BigDecimal total = transport.add(logement).add(terrain).add(communication).add(panier).add(anciennete).add(exceptionnelle);
+
+        bulletin.setPrimeTransport(transport);
+        bulletin.setPrimeLogement(logement);
+        bulletin.setPrimeTerrain(terrain);
+        bulletin.setPrimeCommunication(communication);
+        bulletin.setPrimePanier(panier);
+        bulletin.setPrimeAnciennete(anciennete);
+        bulletin.setPrimeExceptionnelle(exceptionnelle);
+        bulletin.setTotalPrimes(total);
+        bulletin.setAvantagesDiversCommentaire((String) payload.get("avantagesDiversCommentaire"));
+        bulletin.setSalaireNetCalcule(bulletin.getSalaireNetCalcule().add(total));
+    }
+
+    private java.math.BigDecimal decimal(Object value) {
+        if (value == null || value.toString().isBlank()) {
+            return java.math.BigDecimal.ZERO;
+        }
+        return new java.math.BigDecimal(value.toString());
     }
 
     /** Liste toutes les factures */
@@ -181,4 +213,3 @@ public class PaieController {
         }
     }
 }
-

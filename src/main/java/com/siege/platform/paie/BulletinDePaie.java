@@ -62,6 +62,33 @@ public class BulletinDePaie {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal salaireNetCalcule;
 
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal primeTransport = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal primeLogement = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal primeTerrain = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal primeCommunication = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal primePanier = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal primeAnciennete = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal primeExceptionnelle = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalPrimes = BigDecimal.ZERO;
+
+    @Column(columnDefinition = "TEXT")
+    private String avantagesDiversCommentaire;
+
     @Column(nullable = false)
     private LocalDateTime dateCloture;
 

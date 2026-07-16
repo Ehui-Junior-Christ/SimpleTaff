@@ -25,6 +25,14 @@ public class CarteAgent {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String codeQr;
 
+    // NFC/biometrie are optional identifiers (card can be used with QR only).
+    @Column(columnDefinition = "TEXT")
+    private String identifiantNfc;
+
+    @Column(columnDefinition = "TEXT")
+    private String sourceBiometrie;
+
+
     @Column(nullable = false)
     private String statut;
 

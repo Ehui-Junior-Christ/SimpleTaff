@@ -6,6 +6,7 @@ import com.siege.platform.utilisateur.Utilisateur;
 import com.siege.platform.utilisateur.UtilisateurRepository;
 import com.siege.platform.zone.Zone;
 import com.siege.platform.zone.ZoneRepository;
+import com.siege.platform.common.QRCodeUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,15 +21,18 @@ public class AgentTerrainService {
     private final CarteAgentRepository carteAgentRepository;
     private final ZoneRepository zoneRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final QRCodeUtil qrCodeUtil;
 
     public AgentTerrainService(AgentTerrainRepository agentTerrainRepository,
                                CarteAgentRepository carteAgentRepository,
                                ZoneRepository zoneRepository,
-                               UtilisateurRepository utilisateurRepository) {
+                               UtilisateurRepository utilisateurRepository,
+                               QRCodeUtil qrCodeUtil) {
         this.agentTerrainRepository = agentTerrainRepository;
         this.carteAgentRepository = carteAgentRepository;
         this.zoneRepository = zoneRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.qrCodeUtil = qrCodeUtil;
     }
 
     /**
@@ -46,7 +50,6 @@ public class AgentTerrainService {
 
     @Transactional
     public AgentTerrain creerAgent(String nom, String prenom, String contact, UUID zoneId) {
-        // Get logged user's Enterprise to link the agent to the tenant
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Utilisateur user = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur non connecté."));
@@ -64,13 +67,42 @@ public class AgentTerrainService {
 
         AgentTerrain savedAgent = agentTerrainRepository.save(agent);
 
-        // Automatically generate the QR code card for the agent
+        // Create agent QR card (signed QR)
         CarteAgent carte = new CarteAgent();
         carte.setAgent(savedAgent);
-        carte.setCodeQr(savedAgent.getId().toString());
+
+        String agentFullName = savedAgent.getNom() + " " + savedAgent.getPrenom();
+        String signedQRCode = qrCodeUtil.generateQRCode(savedAgent.getId(), agentFullName);
+
+        carte.setCodeQr(signedQRCode);
         carte.setStatut("ACTIVE");
         carteAgentRepository.save(carte);
 
         return savedAgent;
+    }
+
+
+    @Transactional
+    public AgentTerrain creerAgentDepuisPayload(java.util.Map<String, String> payload) {
+        AgentTerrain agent = creerAgent(
+                payload.getOrDefault("nom", "").trim(),
+                payload.getOrDefault("prenom", "").trim(),
+                payload.getOrDefault("contact", "").trim(),
+                UUID.fromString(payload.getOrDefault("zoneId", "").trim())
+        );
+        agent.setTelephoneSecondaire(payload.get("telephoneSecondaire"));
+        agent.setSituationMatrimoniale(payload.get("situationMatrimoniale"));
+        agent.setNombreEnfants(parseInt(payload.get("nombreEnfants")));
+        agent.setContactUrgenceNom(payload.get("contactUrgenceNom"));
+        agent.setContactUrgenceTelephone(payload.get("contactUrgenceTelephone"));
+        agent.setContactUrgenceLien(payload.get("contactUrgenceLien"));
+        return agentTerrainRepository.save(agent);
+    }
+
+    private Integer parseInt(String value) {
+        if (value == null || value.isBlank()) {
+            return 0;
+        }
+        return Integer.parseInt(value);
     }
 }
