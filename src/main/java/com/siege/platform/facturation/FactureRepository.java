@@ -7,4 +7,5 @@ import java.util.UUID;
 
 @Repository
 public interface FactureRepository extends JpaRepository<Facture, UUID> {
+    long countByPeriode(String periode);
 }

@@ -9,7 +9,6 @@ import lombok.Setter;
 import org.hibernate.annotations.Filter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -39,14 +38,26 @@ public class Facture {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal montantFacture;
 
-    @Column(nullable = false, length = 500)
+    @Column(name = "numero_facture", length = 50)
+    private String numeroFacture;
+
+    @Column(name = "montant_ht", nullable = false, precision = 10, scale = 2)
+    private BigDecimal montantHt = BigDecimal.ZERO;
+
+    @Column(name = "montant_tva", nullable = false, precision = 10, scale = 2)
+    private BigDecimal montantTva = BigDecimal.ZERO;
+
+    @Column(name = "montant_ttc", nullable = false, precision = 10, scale = 2)
+    private BigDecimal montantTtc = BigDecimal.ZERO;
+
+    @Column(nullable = false)
     private String rapportPointageUrl;
 
     @Column(nullable = false)
     private String statutPaiement;
 
     @Column(nullable = false)
-    private LocalDateTime dateEmission;
+    private java.time.LocalDate dateEmission;
 
     @Column(nullable = false)
     private String modePaiement = "VIREMENT_BANCAIRE";
@@ -61,6 +72,6 @@ public class Facture {
 
     @PrePersist
     protected void onCreate() {
-        dateEmission = LocalDateTime.now();
+        dateEmission = java.time.LocalDate.now();
     }
 }

@@ -91,6 +91,19 @@ public class EntrepriseAdminController {
             map.put("dateDebut", a.getDateDebutOccupation() != null ? a.getDateDebutOccupation().toString() : "—");
             map.put("dateFin", a.getDateFinOccupation() != null ? a.getDateFinOccupation().toString() : "—");
             map.put("statut", a.getStatut());
+
+            // Detailed operational fields
+            map.put("region", a.getRegion());
+            map.put("ville", a.getVille());
+            map.put("commune", a.getCommune());
+            map.put("zoneOperationnelle", a.getZoneOperationnelle());
+            map.put("superviseur", a.getSuperviseur());
+            map.put("client", a.getClient());
+            map.put("mission", a.getMission());
+            map.put("projet", a.getProjet());
+            map.put("heureArriveeSite", a.getHeureArriveeSite());
+            map.put("heureDepartSite", a.getHeureDepartSite());
+
             response.add(map);
         }
         return ResponseEntity.ok(response);
@@ -110,7 +123,7 @@ public class EntrepriseAdminController {
             UUID posteId = UUID.fromString(posteIdStr);
             UUID agentId = UUID.fromString(agentIdStr);
             LocalDate dateDebut = LocalDate.parse(dateStr);
-            Affectation aff = affectationService.creerAffectation(posteId, agentId, dateDebut);
+            Affectation aff = affectationService.creerAffectation(posteId, agentId, dateDebut, payload);
             return ResponseEntity.ok(Map.of("message", "Affectation créée !", "id", aff.getId()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

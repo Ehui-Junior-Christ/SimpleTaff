@@ -19,9 +19,8 @@ public class AuditController {
     @GetMapping
     public List<AuditLog> list(@RequestParam(required = false) LocalDate dateDebut,
                                @RequestParam(required = false) LocalDate dateFin) {
-        if (dateDebut == null || dateFin == null) {
-            return repository.findAll();
-        }
-        return repository.findByCreeLeBetweenOrderByCreeLeDesc(dateDebut.atStartOfDay(), dateFin.plusDays(1).atStartOfDay());
+        LocalDate debut = dateDebut != null ? dateDebut : LocalDate.now().minusDays(30);
+        LocalDate fin = dateFin != null ? dateFin : LocalDate.now();
+        return repository.findByCreeLeBetweenOrderByCreeLeDesc(debut.atStartOfDay(), fin.plusDays(1).atStartOfDay());
     }
 }

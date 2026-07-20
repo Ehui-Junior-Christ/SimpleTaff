@@ -3,7 +3,6 @@ package com.siege.platform.dashboard;
 import com.siege.platform.agent.AgentTerrainRepository;
 import com.siege.platform.agent.PieceJustificativeRepository;
 import com.siege.platform.contrat.ContratAgentRepository;
-import com.siege.platform.facturation.FactureRepository;
 import com.siege.platform.materiel.MaterielRepository;
 import com.siege.platform.paie.BulletinDePaieRepository;
 import com.siege.platform.poste.AffectationRepository;
@@ -25,7 +24,6 @@ public class DashboardController {
     private final AgentTerrainRepository agentTerrainRepository;
     private final PosteRepository posteRepository;
     private final AffectationRepository affectationRepository;
-    private final FactureRepository factureRepository;
     private final ContratAgentRepository contratRepository;
     private final PieceJustificativeRepository pieceRepository;
     private final MaterielRepository materielRepository;
@@ -34,7 +32,6 @@ public class DashboardController {
     public DashboardController(AgentTerrainRepository agentTerrainRepository,
                                PosteRepository posteRepository,
                                AffectationRepository affectationRepository,
-                               FactureRepository factureRepository,
                                ContratAgentRepository contratRepository,
                                PieceJustificativeRepository pieceRepository,
                                MaterielRepository materielRepository,
@@ -42,7 +39,6 @@ public class DashboardController {
         this.agentTerrainRepository = agentTerrainRepository;
         this.posteRepository = posteRepository;
         this.affectationRepository = affectationRepository;
-        this.factureRepository = factureRepository;
         this.contratRepository = contratRepository;
         this.pieceRepository = pieceRepository;
         this.materielRepository = materielRepository;

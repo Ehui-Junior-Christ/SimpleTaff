@@ -11,9 +11,10 @@ import com.siege.platform.poste.Affectation;
 import com.siege.platform.poste.AffectationRepository;
 import com.siege.platform.structuredemandeuse.StructureDemandeuse;
 import com.siege.platform.structuredemandeuse.StructureDemandeuseRepository;
-import com.siege.platform.utilisateur.Utilisateur;
 import com.siege.platform.utilisateur.UtilisateurRepository;
-import jakarta.servlet.http.HttpServletRequest;
+import com.siege.platform.audit.AuditLog;
+import com.siege.platform.audit.AuditLogRepository;
+import com.siege.platform.notification.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,27 +30,27 @@ public class PaieController {
     private final FactureRepository factureRepo;
     private final AffectationRepository affectationRepo;
     private final PaieCalculService paieCalculService;
-    private final UtilisateurRepository utilisateurRepo;
-    private final JwtUtils jwtUtils;
     private final FactureService factureService;
     private final StructureDemandeuseRepository structureRepo;
+    private final AuditLogRepository auditLogRepository;
+    private final NotificationService notificationService;
 
     public PaieController(BulletinDePaieRepository bulletinRepo,
                           FactureRepository factureRepo,
                           AffectationRepository affectationRepo,
                           PaieCalculService paieCalculService,
-                          UtilisateurRepository utilisateurRepo,
-                          JwtUtils jwtUtils,
                           FactureService factureService,
-                          StructureDemandeuseRepository structureRepo) {
+                          StructureDemandeuseRepository structureRepo,
+                          AuditLogRepository auditLogRepository,
+                          NotificationService notificationService) {
         this.bulletinRepo = bulletinRepo;
         this.factureRepo = factureRepo;
         this.affectationRepo = affectationRepo;
         this.paieCalculService = paieCalculService;
-        this.utilisateurRepo = utilisateurRepo;
-        this.jwtUtils = jwtUtils;
         this.factureService = factureService;
         this.structureRepo = structureRepo;
+        this.auditLogRepository = auditLogRepository;
+        this.notificationService = notificationService;
     }
 
 
@@ -143,9 +144,13 @@ public class PaieController {
         for (Facture f : factures) {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", f.getId());
+            m.put("numeroFacture", f.getNumeroFacture());
             m.put("periode", f.getPeriode());
             m.put("clientNom", f.getStructureDemandeuse() != null ? f.getStructureDemandeuse().getRaisonSociale() : "—");
             m.put("montantFacture", f.getMontantFacture());
+            m.put("montantHt", f.getMontantHt());
+            m.put("montantTva", f.getMontantTva());
+            m.put("montantTtc", f.getMontantTtc());
             m.put("statutPaiement", f.getStatutPaiement());
             m.put("dateEmission", f.getDateEmission() != null ? f.getDateEmission().toString() : "—");
             result.add(m);
@@ -159,6 +164,20 @@ public class PaieController {
         return bulletinRepo.findById(id).map(b -> {
             b.setStatutPaiement("PAYE");
             bulletinRepo.save(b);
+
+            // Audit Log
+            AuditLog audit = new AuditLog();
+            audit.setEntreprise(b.getEntreprise());
+            audit.setUtilisateurEmail(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName());
+            audit.setAction("PAIEMENT_BULLETIN");
+            audit.setModule("COMPTABILITE_PAIE");
+            audit.setCibleId(b.getId().toString());
+            audit.setDetails("Paiement du bulletin de paie de l'agent " + (b.getAgent() != null ? b.getAgent().getNom() + " " + b.getAgent().getPrenom() : "N/A") + " pour la période : " + b.getPeriode());
+            auditLogRepository.save(audit);
+
+            // Notification
+            notificationService.creerAlerte(b.getEntreprise(), "PAIE", "Bulletin de paie de l'agent " + (b.getAgent() != null ? b.getAgent().getNom() : "N/A") + " marqué comme payé.");
+
             return ResponseEntity.ok(Map.of("message", "Bulletin marqué comme payé."));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -169,6 +188,20 @@ public class PaieController {
         return factureRepo.findById(id).map(f -> {
             f.setStatutPaiement("PAYE");
             factureRepo.save(f);
+
+            // Audit Log
+            AuditLog audit = new AuditLog();
+            audit.setEntreprise(f.getEntreprise());
+            audit.setUtilisateurEmail(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName());
+            audit.setAction("PAIEMENT_FACTURE");
+            audit.setModule("COMPTABILITE_FACTURE");
+            audit.setCibleId(f.getId().toString());
+            audit.setDetails("Paiement enregistré pour la facture N° " + f.getNumeroFacture() + " du client " + (f.getStructureDemandeuse() != null ? f.getStructureDemandeuse().getRaisonSociale() : "N/A"));
+            auditLogRepository.save(audit);
+
+            // Notification
+            notificationService.creerAlerte(f.getEntreprise(), "FACTURE", "Facture N° " + f.getNumeroFacture() + " marquée comme payée.");
+
             return ResponseEntity.ok(Map.of("message", "Facture marquée comme payée."));
         }).orElse(ResponseEntity.notFound().build());
     }

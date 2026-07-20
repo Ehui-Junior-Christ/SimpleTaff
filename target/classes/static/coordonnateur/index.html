@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Espace Coordonnateur — SimpleTaff</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -57,6 +58,22 @@
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
                     Zones & Sites
                 </div>
+                <div class="sidebar-link" data-tab="materiel" onclick="showTab('materiel')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    Besoins Matériel
+                </div>
+                <div class="sidebar-link" data-tab="conges" onclick="showTab('conges')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Demandes Congés
+                </div>
+                <div class="sidebar-link" data-tab="evaluations" onclick="showTab('evaluations')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                    Évaluations
+                </div>
+                <div class="sidebar-link" data-tab="disciplinaire" onclick="showTab('disciplinaire')">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    Sanctions
+                </div>
             </nav>
         </div>
         <div class="p-4 border-t border-slate-100">
@@ -83,29 +100,123 @@
 
             <!-- ═══════════════ TAB: Vue d'ensemble ═══════════════ -->
             <div id="tab-overview" class="tab-content active space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="glass stat-card">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Agents actifs</p>
-                        <div class="text-3xl font-extrabold text-slate-900 mt-1" id="statAgentsCoord">—</div>
+                <!-- Stat Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="glass p-5 rounded-2xl flex items-center justify-between hover:-translate-y-1 transition-all duration-300 shadow-sm border border-white/60">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Agents en service</p>
+                            <div class="text-2xl font-extrabold text-slate-900 mt-1" id="statAgentsCoord">—</div>
+                            <span class="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md mt-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Périmètre actif
+                            </span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-violet-100/80 text-violet-600 flex items-center justify-center text-xl shadow-xs">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
                     </div>
-                    <div class="glass stat-card">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Affectations actives</p>
-                        <div class="text-3xl font-extrabold text-violet-600 mt-1" id="statAffectations">—</div>
+
+                    <div class="glass p-5 rounded-2xl flex items-center justify-between hover:-translate-y-1 transition-all duration-300 shadow-sm border border-white/60">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Affectations actives</p>
+                            <div class="text-2xl font-extrabold text-violet-600 mt-1" id="statAffectations">—</div>
+                            <span class="inline-flex items-center gap-1 text-[10px] text-violet-600 font-bold bg-violet-50 px-2 py-0.5 rounded-md mt-2">
+                                Missions terrain
+                            </span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100/80 text-indigo-600 flex items-center justify-center text-xl shadow-xs">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
                     </div>
-                    <div class="glass stat-card">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Pointages aujourd'hui</p>
-                        <div class="text-3xl font-extrabold text-sky-600 mt-1" id="statPointages">—</div>
+
+                    <div class="glass p-5 rounded-2xl flex items-center justify-between hover:-translate-y-1 transition-all duration-300 shadow-sm border border-white/60">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pointages du Jour</p>
+                            <div class="text-2xl font-extrabold text-sky-600 mt-1" id="statPointages">—</div>
+                            <span class="inline-flex items-center gap-1 text-[10px] text-sky-600 font-bold bg-sky-50 px-2 py-0.5 rounded-md mt-2">
+                                Validation QR
+                            </span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-sky-100/80 text-sky-600 flex items-center justify-center text-xl shadow-xs">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </div>
+                    </div>
+
+                    <div class="glass p-5 rounded-2xl flex items-center justify-between hover:-translate-y-1 transition-all duration-300 shadow-sm border border-white/60">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Demandes Matériel</p>
+                            <div class="text-2xl font-extrabold text-amber-600 mt-1" id="statDemandesMateriel">—</div>
+                            <span class="inline-flex items-center gap-1 text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md mt-2">
+                                En attente / Suivi
+                            </span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-100/80 text-amber-600 flex items-center justify-center text-xl shadow-xs">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Affectations récentes -->
-                <div class="glass rounded-2xl overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                        <h2 class="font-bold text-slate-900">Affectations récentes</h2>
-                        <button onclick="showTab('affectations')" class="text-xs text-violet-600 font-bold hover:underline">Voir tout →</button>
+                <!-- Dashboard Lists Grid (2 columns) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- List 1: Affectations récentes -->
+                    <div class="lg:col-span-7 glass rounded-2xl overflow-hidden shadow-xs border border-white/60 flex flex-col">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-xs font-bold">
+                                    <i class="fa-solid fa-clipboard-user"></i>
+                                </div>
+                                <div>
+                                    <h2 class="font-bold text-sm text-slate-900">Affectations récentes & Postes</h2>
+                                    <p class="text-[11px] text-slate-400">Agents positionnés sur le terrain</p>
+                                </div>
+                            </div>
+                            <button onclick="showTab('affectations')" class="text-xs text-violet-600 font-bold hover:text-violet-800 transition-colors">Voir tout →</button>
+                        </div>
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100/80 font-bold text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-100">
+                                        <th class="px-5 py-3">Agent</th>
+                                        <th class="px-5 py-3">Poste / Mission</th>
+                                        <th class="px-5 py-3">Date Début</th>
+                                        <th class="px-5 py-3 text-right">Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="affectationsRecentesTable" class="divide-y divide-slate-100 text-xs">
+                                    <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Chargement des affectations...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div id="affectationsRecentes" class="divide-y divide-slate-50 text-sm">
-                        <div class="px-6 py-5 text-slate-400 text-center text-sm">Chargement…</div>
+
+                    <!-- List 2: Derniers Pointages du Jour -->
+                    <div class="lg:col-span-5 glass rounded-2xl overflow-hidden shadow-xs border border-white/60 flex flex-col">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </div>
+                                <div>
+                                    <h2 class="font-bold text-sm text-slate-900">Derniers pointages (Aujourd'hui)</h2>
+                                    <p class="text-[11px] text-slate-400">Flux d'entrées et sorties en direct</p>
+                                </div>
+                            </div>
+                            <button onclick="showTab('pointages')" class="text-xs text-violet-600 font-bold hover:text-violet-800 transition-colors">Journal →</button>
+                        </div>
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100/80 font-bold text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-100">
+                                        <th class="px-4 py-3">Agent</th>
+                                        <th class="px-4 py-3">Pointage</th>
+                                        <th class="px-4 py-3">Heure</th>
+                                        <th class="px-4 py-3 text-right">Site</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pointagesRecentsDashboardTable" class="divide-y divide-slate-100 text-xs">
+                                    <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Chargement des pointages...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -187,6 +298,234 @@
                 </div>
             </div>
 
+            <!-- ═══════════════ TAB: Besoins Matériel & Incidents ═══════════════ -->
+            <div id="tab-materiel" class="tab-content space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Demandes de matériel & Signalement d'incidents</h2>
+                        <p class="text-xs text-slate-400">Demandes d'équipements et déclaration d'incidents (pannes, pertes, dégradations)</p>
+                    </div>
+                    <button onclick="loadCoordMateriel()" class="text-xs text-violet-600 font-bold hover:underline">↻ Actualiser</button>
+                </div>
+
+                <!-- Card 1: Demandes de matériel -->
+                <div class="glass p-5 rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Formulaire d'ajout (col-span-4) -->
+                    <div class="lg:col-span-4 space-y-4 border-r border-slate-100 pr-0 lg:pr-6">
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane text-violet-600"></i> Faire une demande de matériel
+                        </h3>
+                        <form id="addMaterielRequestForm" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Nom du matériel / équipement *</label>
+                                <input type="text" id="reqMaterielLibelle" required class="input-field" placeholder="Ex: Gilet de sécurité, Radio portable...">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Catégorie *</label>
+                                <select id="reqMaterielCategorie" required class="input-field">
+                                    <option value="PROTECTION">Protection (EPI)</option>
+                                    <option value="COMMUNICATION">Communication</option>
+                                    <option value="OUTILLAGE">Outillage</option>
+                                    <option value="AUTRE">Autre</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">N° Série (si connu)</label>
+                                    <input type="text" id="reqMaterielNumeroSerie" class="input-field" placeholder="Ex: SN-1234">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Valeur estimée (€)</label>
+                                    <input type="number" step="0.01" min="0" id="reqMaterielValeurAchat" class="input-field" placeholder="Ex: 80.00">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Motif / Justification *</label>
+                                <textarea id="reqMaterielMotif" required class="input-field h-20" placeholder="Précisez pourquoi ce matériel est nécessaire..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-violet w-full py-2.5 text-xs font-bold shadow-sm">Envoyer la demande</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Liste des demandes (col-span-8) -->
+                    <div class="lg:col-span-8 overflow-x-auto">
+                        <h3 class="font-bold text-sm text-slate-800 mb-3">Mes demandes de matériel transmises</h3>
+                        <table class="w-full text-left text-xs">
+                            <thead><tr class="bg-slate-100 font-bold text-slate-500 uppercase text-[10px] tracking-wider">
+                                <th class="p-3">Matériel</th>
+                                <th class="p-3">Catégorie</th>
+                                <th class="p-3">N° Série</th>
+                                <th class="p-3">Valeur (€)</th>
+                                <th class="p-3">Motif</th>
+                                <th class="p-3">Statut</th>
+                            </tr></thead>
+                            <tbody id="coordMaterielRequestsTable" class="divide-y divide-slate-100 text-xs">
+                                <tr><td colspan="6" class="p-6 text-center text-slate-400">Chargement…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Card 2: Inventaire & Déclaration d'Incidents (Panne / Perte / Dégradation) -->
+                <div class="glass p-5 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Signalement d'incidents matériel (Pannes, Pertes, Casse)
+                            </h3>
+                            <p class="text-xs text-slate-400">Consultez les équipements de l'entreprise et signalez directement les incidents constatés sur le terrain.</p>
+                        </div>
+                        <span class="text-xs text-slate-400 font-medium" id="coordMaterielInventoryCount">0 matériel(s)</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 font-bold text-slate-500 uppercase text-[10px] tracking-wider">
+                                    <th class="p-3">Matériel</th>
+                                    <th class="p-3">Catégorie</th>
+                                    <th class="p-3">N° Série</th>
+                                    <th class="p-3">Valeur (€)</th>
+                                    <th class="p-3">Statut Actuel</th>
+                                    <th class="p-3 text-right">Action / Déclarer Incident</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coordMaterielInventoryTable" class="divide-y divide-slate-100 text-xs">
+                                <tr><td colspan="6" class="p-6 text-center text-slate-400">Chargement de l'inventaire...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ TAB: Demandes Congés ═══════════════ -->
+            <div id="tab-conges" class="tab-content space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-900">Demandes de congés & absences agents</h2>
+                    <button onclick="loadCoordConges()" class="text-xs text-violet-600 font-bold hover:underline">↻ Actualiser</button>
+                </div>
+                <div class="glass p-5 rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Formulaire d'ajout (col-span-4) -->
+                    <div class="lg:col-span-4 space-y-4 border-r border-slate-100 pr-0 lg:pr-6">
+                        <h3 class="font-bold text-sm text-slate-800">Enregistrer une demande de congé</h3>
+                        <form id="addCongeRequestForm" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Agent concerné *</label>
+                                <select id="reqCongeAgentSelect" required class="input-field">
+                                    <option value="">Sélectionner l'agent...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Type de congé *</label>
+                                <select id="reqCongeType" required class="input-field">
+                                    <option value="ANNUEL">Congé Annuel</option>
+                                    <option value="MALADIE">Congé Maladie</option>
+                                    <option value="MATERNITE">Maternité / Paternité</option>
+                                    <option value="EXCEPTIONNEL">Permissions exceptionnelles</option>
+                                    <option value="ABSENCE_INJUSTIFIEE">Absence injustifiée (signalement)</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Date Début *</label>
+                                    <input type="date" id="reqCongeDateDebut" required class="input-field">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Date Fin *</label>
+                                    <input type="date" id="reqCongeDateFin" required class="input-field">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Motif / Justification</label>
+                                <textarea id="reqCongeMotif" class="input-field h-20" placeholder="Motif ou détails..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-violet w-full py-2.5 text-xs">Soumettre la demande</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Liste des congés (col-span-8) -->
+                    <div class="lg:col-span-8 overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead><tr class="bg-slate-100 font-bold text-slate-500 uppercase">
+                                <th class="p-3">Agent</th>
+                                <th class="p-3">Type</th>
+                                <th class="p-3">Dates</th>
+                                <th class="p-3">Statut</th>
+                            </tr></thead>
+                            <tbody id="coordCongesRequestsTable" class="divide-y divide-slate-100 text-sm">
+                                <tr><td colspan="4" class="p-6 text-center text-slate-400">Chargement…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ TAB: Évaluations ═══════════════ -->
+            <div id="tab-evaluations" class="tab-content space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Évaluations & Performance</h2>
+                        <p class="text-xs text-slate-400">Suivi des performances des agents de votre périmètre.</p>
+                    </div>
+                    <button onclick="loadCoordEvaluations()" class="text-xs text-violet-600 font-bold hover:underline">↻ Actualiser</button>
+                </div>
+                <div class="glass p-6 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 text-sm">Registre des évaluations</h3>
+                        <input type="text" id="searchEvaluationsCoord" oninput="filterEvaluationsCoord()" placeholder="Rechercher par nom..." class="input-field w-48 text-xs py-1.5 px-3">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
+                                    <th class="p-3">Agent</th>
+                                    <th class="p-3">Année</th>
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Score Total</th>
+                                    <th class="p-3">Commentaire</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coordEvaluationsTable" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ TAB: Disciplinaire ═══════════════ -->
+            <div id="tab-disciplinaire" class="tab-content space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Sanctions & Discipline</h2>
+                        <p class="text-xs text-slate-400">Registre des incidents et sanctions des agents de votre périmètre.</p>
+                    </div>
+                    <button onclick="loadCoordDisciplinaire()" class="text-xs text-violet-600 font-bold hover:underline">↻ Actualiser</button>
+                </div>
+                <div class="glass p-6 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 text-sm">Registre des sanctions</h3>
+                        <input type="text" id="searchSanctionsCoord" oninput="filterSanctionsCoord()" placeholder="Rechercher par nom..." class="input-field w-48 text-xs py-1.5 px-3">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
+                                    <th class="p-3">Agent</th>
+                                    <th class="p-3">Type</th>
+                                    <th class="p-3">Date Décision</th>
+                                    <th class="p-3">Fin</th>
+                                    <th class="p-3">Motif</th>
+                                    <th class="p-3">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coordSanctionsTable" class="divide-y divide-slate-100">
+                                <tr><td colspan="6" class="p-3 text-center text-slate-400">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -208,6 +547,13 @@
                 loadPointages();
             }
             if (name === 'zones') loadZones();
+            if (name === 'materiel') loadCoordMateriel();
+            if (name === 'conges') {
+                loadAgentsForCongeSelect();
+                loadCoordConges();
+            }
+            if (name === 'evaluations') loadCoordEvaluations();
+            if (name === 'disciplinaire') loadCoordDisciplinaire();
         }
         window.showTab = showTab;
 
@@ -219,13 +565,22 @@
                     tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucun agent trouvé.</td></tr>';
                     return;
                 }
-                tbody.innerHTML = data.map(a => `
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4 font-semibold text-slate-900">${a.nom} ${a.prenom}</td>
-                        <td class="px-6 py-4 text-slate-500">${a.contact || '—'}</td>
-                        <td class="px-6 py-4 text-slate-500">${a.zoneNom || '—'}</td>
-                        <td class="px-6 py-4"><span class="badge ${a.statut === 'ACTIF' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">${a.statut}</span></td>
-                    </tr>`).join('');
+                tbody.innerHTML = data.map(a => {
+                    const initials = `${a.nom || ''} ${a.prenom || ''}`.trim().split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AG';
+                    return `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-slate-900 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold text-[11px] flex items-center justify-center shadow-xs">
+                                    ${initials}
+                                </div>
+                                ${a.nom} ${a.prenom}
+                            </td>
+                            <td class="px-6 py-4 text-slate-600 font-medium">${a.contact || '—'}</td>
+                            <td class="px-6 py-4 text-slate-600 font-semibold">${a.zoneNom || '—'}</td>
+                            <td class="px-6 py-4"><span class="badge ${a.statut === 'ACTIF' ? 'bg-emerald-100 text-emerald-700 font-bold' : 'bg-slate-100 text-slate-500'}">${a.statut || 'ACTIF'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
             } catch (e) {
                 tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
             }
@@ -237,21 +592,33 @@
             try {
                 const data = await apiFetch('/coordonnateur/affectations');
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucune affectation.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Aucune affectation enregistrée.</td></tr>';
                     return;
                 }
-                tbody.innerHTML = data.map(a => `
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4 font-semibold text-slate-900">${a.agentNom || '—'}</td>
-                        <td class="px-6 py-4 text-slate-500">${a.posteLibelle || '—'}</td>
-                        <td class="px-6 py-4 text-slate-500">${a.dateDebut || '—'}</td>
-                        <td class="px-6 py-4"><span class="badge ${a.statut === 'ACTIVE' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}">${a.statut}</span></td>
-                    </tr>`).join('');
+                tbody.innerHTML = data.map(a => {
+                    const agentNom = a.agentNom || 'Agent Inconnu';
+                    const initials = agentNom.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AG';
+                    const badge = (a.statut || '').toUpperCase() === 'ACTIVE' 
+                        ? '<span class="badge bg-emerald-100 text-emerald-700 font-bold">🟢 Active</span>'
+                        : '<span class="badge bg-slate-100 text-slate-600 font-medium">Clôturée</span>';
+
+                    return `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-slate-900 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-violet-600 text-white font-bold text-[11px] flex items-center justify-center shadow-xs">
+                                    ${initials}
+                                </div>
+                                ${agentNom}
+                            </td>
+                            <td class="px-6 py-4 text-slate-700 font-semibold">${a.posteLibelle || '—'}</td>
+                            <td class="px-6 py-4 text-slate-500 font-medium">${a.dateDebut ? formatDateLabel(a.dateDebut) : '—'}</td>
+                            <td class="px-6 py-4">${badge}</td>
+                        </tr>
+                    `;
+                }).join('');
             } catch (e) {
                 tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
             }
-            // Also update overview
-            document.getElementById('affectationsRecentes').innerHTML = document.getElementById('affectationsTable').innerHTML;
         }
         window.loadAffectations = loadAffectations;
 
@@ -266,13 +633,21 @@
                     return;
                 }
                 document.getElementById('statPointages').textContent = data.length;
-                tbody.innerHTML = data.map(p => `
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4 font-semibold text-slate-900">${p.agentNom || '—'}</td>
-                        <td class="px-6 py-4"><span class="badge ${p.typePointage === 'ENTREE' ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}">${p.typePointage}</span></td>
-                        <td class="px-6 py-4 text-slate-500">${p.dateHeure ? new Date(p.dateHeure).toLocaleTimeString('fr-FR') : '—'}</td>
-                        <td class="px-6 py-4 text-slate-500">${p.siteNom || '—'}</td>
-                    </tr>`).join('');
+                tbody.innerHTML = data.map(p => {
+                    const isEntree = (p.typePointage || '').toUpperCase() === 'ENTREE';
+                    const badge = isEntree 
+                        ? '<span class="badge bg-emerald-100 text-emerald-700 font-bold">🟢 Entrée</span>'
+                        : '<span class="badge bg-rose-100 text-rose-700 font-bold">🔴 Sortie</span>';
+                    const timeStr = p.dateHeure ? new Date(p.dateHeure).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+                    return `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-slate-900">${p.agentNom || '—'}</td>
+                            <td class="px-6 py-4">${badge}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-slate-700">${timeStr}</td>
+                            <td class="px-6 py-4 text-slate-600 font-semibold">${p.siteNom || '—'}</td>
+                        </tr>
+                    `;
+                }).join('');
             } catch (e) {
                 tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
             }
@@ -337,7 +712,177 @@
         }
         window.loadZones = loadZones;
 
+        async function loadCoordMateriel() {
+            const tbodyRequests = document.getElementById('coordMaterielRequestsTable');
+            const tbodyInventory = document.getElementById('coordMaterielInventoryTable');
+            const countElem = document.getElementById('coordMaterielInventoryCount');
+
+            // 1. Demandes
+            try {
+                const data = await apiFetch('/materiels/demandes') || [];
+                if (data.length === 0) {
+                    if (tbodyRequests) tbodyRequests.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">Aucune demande enregistrée.</td></tr>';
+                } else {
+                    const badgeMap = {
+                        'EN_ATTENTE': 'bg-amber-100 text-amber-700 font-bold',
+                        'APPROUVE': 'bg-green-100 text-green-700 font-bold',
+                        'REFUSE': 'bg-red-100 text-red-700 font-bold'
+                    };
+                    if (tbodyRequests) {
+                        tbodyRequests.innerHTML = data.map(d => {
+                            const numSerie = d.numeroSerie || '—';
+                            const val = d.valeurAchat != null ? `${Number(d.valeurAchat).toFixed(2)} €` : '—';
+                            return `
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-3 font-bold text-slate-800">${d.libelle || '—'}</td>
+                                    <td class="p-3 text-slate-500">${d.categorie || '—'}</td>
+                                    <td class="p-3 font-mono text-slate-600 font-semibold">${numSerie}</td>
+                                    <td class="p-3 text-slate-700 font-bold">${val}</td>
+                                    <td class="p-3 text-slate-500 max-w-xs truncate" title="${d.motif || ''}">${d.motif || '—'}</td>
+                                    <td class="p-3"><span class="badge ${badgeMap[d.statut] || 'bg-amber-100 text-amber-700'}">${d.statut || 'EN_ATTENTE'}</span></td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (e) {
+                if (tbodyRequests) tbodyRequests.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-400">${e.message}</td></tr>`;
+            }
+
+            // 2. Inventaire général & Signalement d'Incidents
+            try {
+                const materiels = await apiFetch('/materiels') || [];
+                if (countElem) countElem.textContent = `${materiels.length} matériel(s)`;
+                if (tbodyInventory) {
+                    if (materiels.length === 0) {
+                        tbodyInventory.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">Aucun matériel dans l\'inventaire de l\'entreprise.</td></tr>';
+                    } else {
+                        tbodyInventory.innerHTML = materiels.map(m => {
+                            let statusBadge = '';
+                            const st = (m.statut || '').toUpperCase();
+                            if (st === 'DISPONIBLE') {
+                                statusBadge = '<span class="badge bg-green-100 text-green-700 font-bold">🟢 Disponible</span>';
+                            } else if (st === 'ASSIGNE' || st === 'REMIS') {
+                                statusBadge = '<span class="badge bg-sky-100 text-sky-700 font-bold">🔵 Assigné</span>';
+                            } else if (st === 'DEFECTUEUX' || st === 'EN_PANNE' || st === 'REPARATION') {
+                                statusBadge = '<span class="badge bg-amber-100 text-amber-800 font-bold">⚠️ En Panne / Défaut</span>';
+                            } else if (st === 'INUTILISABLE') {
+                                statusBadge = '<span class="badge bg-rose-100 text-rose-700 font-bold">⛔ Inutilisable</span>';
+                            } else if (st === 'PERDU') {
+                                statusBadge = '<span class="badge bg-purple-100 text-purple-700 font-bold">🔍 Perdu</span>';
+                            } else {
+                                statusBadge = `<span class="badge bg-slate-100 text-slate-700 font-bold">${st || '—'}</span>`;
+                            }
+
+                            const val = m.valeurAchat != null ? `${Number(m.valeurAchat).toFixed(2)} €` : '—';
+                            const numSerie = m.numeroSerie || m.serialNumber || '—';
+
+                            return `
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-3 font-bold text-slate-800">${m.libelle || m.nom || '—'}</td>
+                                    <td class="p-3 text-slate-600">${m.categorie || '—'}</td>
+                                    <td class="p-3 font-mono text-slate-600 font-semibold">${numSerie}</td>
+                                    <td class="p-3 text-slate-700 font-bold">${val}</td>
+                                    <td class="p-3">${statusBadge}</td>
+                                    <td class="p-3 text-right">
+                                        <button onclick="declarerIncidentMateriel('${m.id}', '${(m.libelle || '').replace(/'/g, "\\'")}')" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-lg font-bold transition-colors shadow-xs">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Signaler Incident
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (e) {
+                if (tbodyInventory) tbodyInventory.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-400">${e.message}</td></tr>`;
+            }
+        }
+        window.loadCoordMateriel = loadCoordMateriel;
+
+        window.declarerIncidentMateriel = async function(id, libelle) {
+            const choixStatut = prompt(
+                `Déclaration d'incident terrain pour "${libelle}" :\n\n` +
+                `Tapez le numéro du type d'incident :\n` +
+                `1 - DEFECTUEUX (Panne technique / Matériel défaillant)\n` +
+                `2 - INUTILISABLE (Hors service / Cassé sur le terrain)\n` +
+                `3 - PERDU (Matériel égaré ou non restitué par l'agent)\n`,
+                "1"
+            );
+
+            if (!choixStatut) return;
+
+            let statut = 'DEFECTUEUX';
+            if (choixStatut.trim() === '2' || choixStatut.toUpperCase().includes('INUTILISABLE')) {
+                statut = 'INUTILISABLE';
+            } else if (choixStatut.trim() === '3' || choixStatut.toUpperCase().includes('PERDU')) {
+                statut = 'PERDU';
+            } else if (choixStatut.trim() === '1' || choixStatut.toUpperCase().includes('DEFECTUEUX') || choixStatut.toUpperCase().includes('PANNE')) {
+                statut = 'DEFECTUEUX';
+            } else {
+                alert("Statut d'incident invalide.");
+                return;
+            }
+
+            const details = prompt(`Motif & circonstances de l'incident terrain (ex: Écran fendu lors de l'intervention, radio égarée par l'agent X) :`, "");
+            if (details === null) return;
+
+            try {
+                await apiFetch(`/materiels/${id}/incident`, {
+                    method: 'POST',
+                    body: JSON.stringify({ statut, details: details || '' })
+                });
+
+                alert(`Incident enregistré (${statut}) ! L'état du matériel a été mis à jour et l'alerte a été transmise à la direction.`);
+                loadCoordMateriel();
+            } catch (e) {
+                console.error(e);
+                alert("Erreur lors de la déclaration de l'incident: " + (e.message || e));
+            }
+        };
+
+        async function loadAgentsForCongeSelect() {
+            const select = document.getElementById('reqCongeAgentSelect');
+            if (!select) return;
+            try {
+                const agents = await apiFetch('/coordonnateur/agents');
+                select.innerHTML = '<option value="">Sélectionner l\'agent...</option>' + 
+                    agents.map(a => `<option value="${a.id}">${a.nom} ${a.prenom}</option>`).join('');
+            } catch(e) {
+                console.error("Erreur chargement agents pour select", e);
+            }
+        }
+        window.loadAgentsForCongeSelect = loadAgentsForCongeSelect;
+
+        async function loadCoordConges() {
+            const tbody = document.getElementById('coordCongesRequestsTable');
+            try {
+                const data = await apiFetch('/conges');
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">Aucune demande enregistrée.</td></tr>';
+                    return;
+                }
+                const badgeMap = {
+                    'EN_ATTENTE_RH': 'bg-amber-100 text-amber-700',
+                    'EN_ATTENTE_SUPERVISEUR': 'bg-sky-100 text-sky-700',
+                    'VALIDEE': 'bg-green-100 text-green-700',
+                    'REFUSEE': 'bg-red-100 text-red-700'
+                };
+                tbody.innerHTML = data.map(d => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-3 font-bold text-slate-800">${d.agent ? (d.agent.nom + ' ' + d.agent.prenom) : '—'}</td>
+                        <td class="p-3 text-slate-500">${d.type}</td>
+                        <td class="p-3 text-slate-500">Du ${d.dateDebut} au ${d.dateFin}</td>
+                        <td class="p-3"><span class="badge ${badgeMap[d.statut] || 'bg-slate-100 text-slate-500'}">${d.statut}</span></td>
+                    </tr>`).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-red-400">${e.message}</td></tr>`;
+            }
+        }
+        window.loadCoordConges = loadCoordConges;
+
         async function loadOverview() {
+            // 1. Stats
             try {
                 const stats = await apiFetch('/coordonnateur/stats');
                 if (stats) {
@@ -348,8 +893,86 @@
             } catch(e) {
                 console.error('Stats coordonnateur non disponibles', e);
             }
-            await loadAffectations();
+
+            // Stats demandes matériel
+            try {
+                const demandes = await apiFetch('/materiels/demandes') || [];
+                const enAttente = demandes.filter(d => (d.statut || '').toUpperCase() === 'EN_ATTENTE').length;
+                const statDemandes = document.getElementById('statDemandesMateriel');
+                if (statDemandes) statDemandes.textContent = enAttente > 0 ? `${enAttente} attente` : (demandes.length || '0');
+            } catch(e) {}
+
+            // 2. Dashboard List 1: Affectations récentes
+            const tbodyAffRec = document.getElementById('affectationsRecentesTable');
+            try {
+                const affectations = await apiFetch('/coordonnateur/affectations') || [];
+                if (tbodyAffRec) {
+                    if (affectations.length === 0) {
+                        tbodyAffRec.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400 font-medium">Aucune affectation active.</td></tr>';
+                    } else {
+                        tbodyAffRec.innerHTML = affectations.slice(0, 6).map(a => {
+                            const agentNom = a.agentNom || 'Agent Inconnu';
+                            const initials = agentNom.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AG';
+                            const badge = (a.statut || '').toUpperCase() === 'ACTIVE' 
+                                ? '<span class="badge bg-emerald-100 text-emerald-700 font-bold">🟢 En Mission</span>'
+                                : '<span class="badge bg-slate-100 text-slate-600 font-medium">Clôturé</span>';
+                            
+                            return `
+                                <tr class="hover:bg-slate-50/70 transition-colors border-b border-slate-100/60">
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-violet-600 text-white font-bold text-[11px] flex items-center justify-center shadow-xs">
+                                                ${initials}
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-slate-900 text-xs">${agentNom}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-3.5 text-slate-700 font-semibold">${a.posteLibelle || a.siteNom || '—'}</td>
+                                    <td class="px-5 py-3.5 text-slate-500 font-medium">${a.dateDebut ? formatDateLabel(a.dateDebut) : '—'}</td>
+                                    <td class="px-5 py-3.5 text-right">${badge}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (e) {
+                if (tbodyAffRec) tbodyAffRec.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
+            }
+
+            // 3. Dashboard List 2: Pointages aujourd'hui
+            const tbodyPtRec = document.getElementById('pointagesRecentsDashboardTable');
+            const todayStr = new Date().toISOString().slice(0, 10);
+            try {
+                const pointages = await apiFetch(`/coordonnateur/pointages?date=${todayStr}`) || [];
+                if (tbodyPtRec) {
+                    if (pointages.length === 0) {
+                        tbodyPtRec.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400 font-medium">Aucun pointage enregistré aujourd\'hui.</td></tr>';
+                    } else {
+                        tbodyPtRec.innerHTML = pointages.slice(0, 6).map(p => {
+                            const isEntree = (p.typePointage || '').toUpperCase() === 'ENTREE';
+                            const badge = isEntree 
+                                ? '<span class="badge bg-emerald-100 text-emerald-700 font-bold">🟢 Entrée</span>'
+                                : '<span class="badge bg-rose-100 text-rose-700 font-bold">🔴 Sortie</span>';
+                            const timeStr = p.dateHeure ? new Date(p.dateHeure).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+                            
+                            return `
+                                <tr class="hover:bg-slate-50/70 transition-colors border-b border-slate-100/60">
+                                    <td class="px-4 py-3.5 font-bold text-slate-900 text-xs">${p.agentNom || '—'}</td>
+                                    <td class="px-4 py-3.5">${badge}</td>
+                                    <td class="px-4 py-3.5 font-mono text-slate-700 font-bold text-xs">${timeStr}</td>
+                                    <td class="px-4 py-3.5 text-right font-semibold text-slate-600">${p.siteNom || '—'}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch(e) {
+                if (tbodyPtRec) tbodyPtRec.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">${e.message}</td></tr>`;
+            }
         }
+        window.loadOverview = loadOverview;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!checkAuth()) { window.location.href = '/vitrine/login.html'; return; }
@@ -365,7 +988,169 @@
                 });
             }
             loadOverview();
+
+            // Material Request form submission
+            const addMaterielRequestForm = document.getElementById('addMaterielRequestForm');
+            if (addMaterielRequestForm) {
+                addMaterielRequestForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const submitBtn = e.currentTarget.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Envoi...';
+                    try {
+                        const libelle = document.getElementById('reqMaterielLibelle').value.trim();
+                        const categorie = document.getElementById('reqMaterielCategorie').value;
+                        const numeroSerie = document.getElementById('reqMaterielNumeroSerie')?.value?.trim();
+                        const valeurAchatStr = document.getElementById('reqMaterielValeurAchat')?.value;
+                        const valeurAchat = valeurAchatStr ? parseFloat(valeurAchatStr) : null;
+                        const motif = document.getElementById('reqMaterielMotif').value.trim();
+
+                        await apiFetch('/materiels/demandes', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                libelle,
+                                categorie,
+                                numeroSerie,
+                                valeurAchat,
+                                motif
+                            })
+                        });
+                        addMaterielRequestForm.reset();
+                        alert("Demande de matériel envoyée !");
+                        loadCoordMateriel();
+                    } catch (err) {
+                        alert(err.message);
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Envoyer la demande';
+                    }
+                });
+            }
+
+            // Conge Request form submission
+            const addCongeRequestForm = document.getElementById('addCongeRequestForm');
+            if (addCongeRequestForm) {
+                addCongeRequestForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const submitBtn = e.currentTarget.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Envoi...';
+                    try {
+                        await apiFetch('/conges', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                agentId: document.getElementById('reqCongeAgentSelect').value,
+                                type: document.getElementById('reqCongeType').value,
+                                dateDebut: document.getElementById('reqCongeDateDebut').value,
+                                dateFin: document.getElementById('reqCongeDateFin').value,
+                                motif: document.getElementById('reqCongeMotif').value
+                            })
+                        });
+                        addCongeRequestForm.reset();
+                        alert("Demande de congé soumise avec succès !");
+                        loadCoordConges();
+                    } catch (err) {
+                        alert(err.message);
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Soumettre la demande';
+                    }
+                });
+            }
+
+            loadOverview();
         });
+
+        // ── Évaluations (read-only) ────────────────────────────────────
+        async function loadCoordEvaluations() {
+            const tbody = document.getElementById('coordEvaluationsTable');
+            try {
+                const evals = await apiFetch('/evaluations');
+                window.allCoordEvals = evals || [];
+                renderCoordEvaluations(window.allCoordEvals);
+            } catch (err) {
+                console.error(err);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-red-500">Erreur de chargement des évaluations</td></tr>';
+            }
+        }
+        window.loadCoordEvaluations = loadCoordEvaluations;
+
+        function renderCoordEvaluations(list) {
+            const tbody = document.getElementById('coordEvaluationsTable');
+            if (!tbody) return;
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-slate-400">Aucune évaluation enregistrée.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(ev => {
+                const agentNom = ev.agent ? (ev.agent.nom || 'N/A') : 'N/A';
+                const dateEval = ev.dateEvaluation || '—';
+                return `
+                    <tr class="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
+                        <td class="p-3 font-bold text-slate-900">${agentNom}</td>
+                        <td class="p-3">${ev.annee}</td>
+                        <td class="p-3 text-slate-500">${dateEval}</td>
+                        <td class="p-3 font-bold text-violet-600">${ev.scoreTotal || 0} / 80</td>
+                        <td class="p-3 text-slate-500 max-w-xs truncate" title="${ev.commentaire || ''}">${ev.commentaire || '—'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.filterEvaluationsCoord = function() {
+            const query = document.getElementById('searchEvaluationsCoord')?.value?.toLowerCase() || '';
+            if (!window.allCoordEvals) return;
+            renderCoordEvaluations(window.allCoordEvals.filter(ev => {
+                const nom = ev.agent ? (ev.agent.nom || '') : '';
+                return nom.toLowerCase().includes(query);
+            }));
+        };
+
+        // ── Disciplinaire (read-only) ──────────────────────────────────
+        async function loadCoordDisciplinaire() {
+            const tbody = document.getElementById('coordSanctionsTable');
+            try {
+                const sanctions = await apiFetch('/disciplinaire/sanctions');
+                window.allCoordSanctions = sanctions || [];
+                renderCoordSanctions(window.allCoordSanctions);
+            } catch (err) {
+                console.error(err);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-red-500">Erreur de chargement des sanctions</td></tr>';
+            }
+        }
+        window.loadCoordDisciplinaire = loadCoordDisciplinaire;
+
+        function renderCoordSanctions(list) {
+            const tbody = document.getElementById('coordSanctionsTable');
+            if (!tbody) return;
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-slate-400">Aucune sanction enregistrée.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(s => {
+                const agentNom = s.agent ? (s.agent.nom || 'N/A') : 'N/A';
+                const badgeClass = s.statut === 'EN_COURS' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700';
+                return `
+                    <tr class="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
+                        <td class="p-3 font-bold text-slate-900">${agentNom}</td>
+                        <td class="p-3 font-medium text-slate-700">${s.type}</td>
+                        <td class="p-3 text-slate-500">${s.dateDecision}</td>
+                        <td class="p-3 text-slate-500">${s.dateFin || '—'}</td>
+                        <td class="p-3 text-slate-500 max-w-xs truncate" title="${s.motif || ''}">${s.motif || '—'}</td>
+                        <td class="p-3"><span class="badge ${badgeClass}">${s.statut}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.filterSanctionsCoord = function() {
+            const query = document.getElementById('searchSanctionsCoord')?.value?.toLowerCase() || '';
+            if (!window.allCoordSanctions) return;
+            renderCoordSanctions(window.allCoordSanctions.filter(s => {
+                const nom = s.agent ? (s.agent.nom || '') : '';
+                return nom.toLowerCase().includes(query);
+            }));
+        };
     </script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 package com.siege.platform.mission;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.siege.platform.agent.AgentTerrain;
 import com.siege.platform.entreprise.Entreprise;
 import com.siege.platform.poste.Affectation;
@@ -17,19 +19,23 @@ import java.util.UUID;
 @Getter
 @Setter
 @Filter(name = "tenantFilter", condition = "entreprise_id = :entrepriseId")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Mission {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entreprise_id", nullable = false)
     private Entreprise entreprise;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "entreprise", "affectations", "pointages", "evaluations", "conges"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agent_id", nullable = false)
     private AgentTerrain agent;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "entreprise", "agent"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "affectation_id")
     private Affectation affectation;
@@ -46,9 +52,9 @@ public class Mission {
     @Column(columnDefinition = "TEXT")
     private String objectifs;
 
-    private LocalDateTime planningDebut;
+    private java.time.LocalDate planningDebut;
 
-    private LocalDateTime planningFin;
+    private java.time.LocalDate planningFin;
 
     @Column(nullable = false)
     private String statut = "PREVUE";

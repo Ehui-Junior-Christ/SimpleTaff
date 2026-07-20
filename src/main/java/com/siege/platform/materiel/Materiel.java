@@ -1,5 +1,7 @@
 package com.siege.platform.materiel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.siege.platform.entreprise.Entreprise;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -13,11 +15,13 @@ import java.util.UUID;
 @Getter
 @Setter
 @Filter(name = "tenantFilter", condition = "entreprise_id = :entrepriseId")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Materiel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entreprise_id", nullable = false)
     private Entreprise entreprise;
@@ -32,6 +36,20 @@ public class Materiel {
     private String operateur;
     private String forfait;
     private String creditMensuel;
+
+    private String description;
+
+    @Column(name = "valeur_achat")
+    private java.math.BigDecimal valeurAchat = java.math.BigDecimal.ZERO;
+
+    private String marque;
+    private String modele;
+    private String imei;
+    private java.time.LocalDate dateAcquisition;
+    private java.time.LocalDate dateAffectation;
+    private String garantie;
+    private String numeroSim;
+    private java.time.LocalDate dateActivation;
 
     @Column(nullable = false)
     private String statut = "DISPONIBLE";

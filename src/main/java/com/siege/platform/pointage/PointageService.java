@@ -19,26 +19,56 @@ public class PointageService {
     private final CarteAgentRepository carteAgentRepository;
     private final AffectationRepository affectationRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final com.siege.platform.common.QRCodeUtil qrCodeUtil;
 
     public PointageService(PointageRepository pointageRepository,
                            CarteAgentRepository carteAgentRepository,
                            AffectationRepository affectationRepository,
-                           UtilisateurRepository utilisateurRepository) {
+                           UtilisateurRepository utilisateurRepository,
+                           com.siege.platform.common.QRCodeUtil qrCodeUtil) {
         this.pointageRepository = pointageRepository;
         this.carteAgentRepository = carteAgentRepository;
         this.affectationRepository = affectationRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.qrCodeUtil = qrCodeUtil;
     }
 
     @Transactional
     public Pointage scannerCarte(String codeQr) {
-        return scannerCarte(codeQr, null);
+        return scannerCarte(codeQr, null, "QR_CODE");
     }
 
     @Transactional
     public Pointage scannerCarte(String codeQr, String typePointage) {
-        CarteAgent carte = carteAgentRepository.findByCodeQrAndStatut(codeQr, "ACTIVE")
-                .orElseThrow(() -> new IllegalArgumentException("Carte invalide ou inactive."));
+        return scannerCarte(codeQr, typePointage, "QR_CODE");
+    }
+
+    @Transactional
+    public Pointage scannerCarte(String identifiant, String typePointage, String mode) {
+        Optional<CarteAgent> carteOpt;
+        String resolvedMode = mode != null ? mode.toUpperCase() : "QR_CODE";
+
+        if ("NFC".equals(resolvedMode)) {
+            carteOpt = carteAgentRepository.findByIdentifiantNfcAndStatut(identifiant, "ACTIVE");
+        } else if ("BIOMETRIE".equals(resolvedMode)) {
+            carteOpt = carteAgentRepository.findBySourceBiometrieAndStatut(identifiant, "ACTIVE");
+        } else {
+            // QR Code (cryptographic or fallback to direct matching)
+            UUID agentId = null;
+            try {
+                agentId = qrCodeUtil.extractAgentId(identifiant);
+            } catch (Exception e) {
+                // Not a valid JWT or expired, fallback to direct matching
+            }
+
+            if (agentId != null) {
+                carteOpt = carteAgentRepository.findByAgentIdAndStatut(agentId, "ACTIVE");
+            } else {
+                carteOpt = carteAgentRepository.findByCodeQrAndStatut(identifiant, "ACTIVE");
+            }
+        }
+
+        CarteAgent carte = carteOpt.orElseThrow(() -> new IllegalArgumentException("Carte active introuvable."));
 
         Affectation affectationActive = affectationRepository.findByAgentIdAndStatut(carte.getAgent().getId(), "ACTIVE")
                 .orElseThrow(() -> new IllegalStateException("L'agent n'a aucune affectation active."));
@@ -58,6 +88,7 @@ public class PointageService {
             throw new IllegalArgumentException("Type de pointage invalide.");
         }
 
+        Pointage saved;
         if (pointageDuJour.isPresent()) {
             Pointage p = pointageDuJour.get();
 
@@ -70,20 +101,23 @@ public class PointageService {
             }
 
             p.setDateHeureSortie(LocalDateTime.now());
-            return pointageRepository.save(p);
-        }
+            p.setMode(resolvedMode);
+            saved = pointageRepository.save(p);
+        } else {
+            if ("SORTIE".equals(type)) {
+                throw new IllegalStateException("Aucun pointage d'entree aujourd'hui pour cet agent.");
+            }
 
-        if ("SORTIE".equals(type)) {
-            throw new IllegalStateException("Aucun pointage d'entree aujourd'hui pour cet agent.");
+            Pointage nouveauPointage = new Pointage();
+            nouveauPointage.setEntreprise(affectationActive.getEntreprise());
+            nouveauPointage.setAffectation(affectationActive);
+            nouveauPointage.setCarteScannee(carte);
+            nouveauPointage.setDateHeureEntree(LocalDateTime.now());
+            nouveauPointage.setStatut("EN_ATTENTE");
+            nouveauPointage.setMode(resolvedMode);
+            saved = pointageRepository.save(nouveauPointage);
         }
-
-        Pointage nouveauPointage = new Pointage();
-        nouveauPointage.setEntreprise(affectationActive.getEntreprise());
-        nouveauPointage.setAffectation(affectationActive);
-        nouveauPointage.setCarteScannee(carte);
-        nouveauPointage.setDateHeureEntree(LocalDateTime.now());
-        nouveauPointage.setStatut("EN_ATTENTE");
-        return pointageRepository.save(nouveauPointage);
+        return saved;
     }
 
     @Transactional

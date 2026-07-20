@@ -6,11 +6,11 @@ import com.siege.platform.pointage.CarteAgent;
 import com.siege.platform.pointage.CarteAgentRepository;
 import com.siege.platform.pointage.Pointage;
 import com.siege.platform.pointage.PointageRepository;
+import com.siege.platform.pointage.PointageService;
 import com.siege.platform.utilisateur.Employeur;
 import com.siege.platform.utilisateur.UtilisateurRepository;
-import com.siege.platform.entreprise.Entreprise;
-import com.siege.platform.entreprise.EntrepriseRepository;
 import com.siege.platform.config.tenant.TenantContext;
+import com.siege.platform.structuredemandeuse.Site;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,17 +18,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Controller for Employeur (client/structure demandeuse) endpoints.
- *
- * NOTE: This version is intentionally minimal to keep the backend compilable
- * while we fix mismatched entity getters/setters caused by Lombok/build
- * desynchronization.
  */
 @RestController
 @RequestMapping("/api/employeur")
@@ -39,70 +37,213 @@ public class EmployeurController {
     private final AffectationRepository affectationRepository;
     private final PointageRepository pointageRepository;
     private final CarteAgentRepository carteAgentRepository;
-    private final EntrepriseRepository entrepriseRepository;
+    private final PointageService pointageService;
 
     public EmployeurController(UtilisateurRepository utilisateurRepository,
                                AffectationRepository affectationRepository,
                                PointageRepository pointageRepository,
                                CarteAgentRepository carteAgentRepository,
-                               EntrepriseRepository entrepriseRepository) {
+                               PointageService pointageService) {
         this.utilisateurRepository = utilisateurRepository;
         this.affectationRepository = affectationRepository;
         this.pointageRepository = pointageRepository;
         this.carteAgentRepository = carteAgentRepository;
-        this.entrepriseRepository = entrepriseRepository;
+        this.pointageService = pointageService;
     }
+
+    // ── Profil ────────────────────────────────────────────────────────────────
 
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getProfile() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Employeur emp = (Employeur) utilisateurRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Employeur non trouvé"));
-
-        // Keep it very light to avoid dependency on getters that may be missing
-        return ResponseEntity.ok(Map.of(
-                "message", "Profil employeur chargé"
-        ));
+        Employeur emp = getEmployeur(email);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("email", emp.getEmail());
+        m.put("nom", emp.getNom());
+        m.put("prenom", emp.getPrenom());
+        m.put("role", emp.getRole().toString());
+        return ResponseEntity.ok(m);
     }
+
+    // ── Personnel ─────────────────────────────────────────────────────────────
 
     @GetMapping("/personnel")
     public ResponseEntity<List<Map<String, Object>>> getPersonnel() {
-        // Minimal response: backend compilation first.
-        return ResponseEntity.ok(List.of(Map.of(
-                "message", "Endpoint /personnel temporairement simplifié"
-        )));
+        Employeur emp = getEmployeur(SecurityContextHolder.getContext().getAuthentication().getName());
+        java.util.Set<Site> sites = emp.getSites();
+        if (sites == null || sites.isEmpty()) return ResponseEntity.ok(List.of());
+        List<UUID> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
+
+        List<Map<String, Object>> response = affectationRepository.findAllByStatut("ACTIVE").stream()
+                .filter(a -> a.getPoste() != null && a.getPoste().getSite() != null && siteIds.contains(a.getPoste().getSite().getId()))
+                .map(a -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("agentNom", a.getAgent().getPrenom() + " " + a.getAgent().getNom());
+                    m.put("agentId", a.getAgent().getId().toString());
+                    m.put("posteLibelle", a.getPoste().getEmploi() != null ? a.getPoste().getEmploi().getLibelle() : "Agent Terrain");
+                    m.put("zone", a.getPoste().getSite().getZone() != null ? a.getPoste().getSite().getZone().getNom() : "—");
+                    m.put("siteNom", a.getPoste().getSite().getNom() != null ? a.getPoste().getSite().getNom() : "—");
+                    m.put("statut", a.getStatut());
+                    return m;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
+
+    /**
+     * Retourne la liste des agents assignés aux sites de l'employeur
+     * sans leur QR code (masqué pour des raisons de sécurité/confidentialité) pour affichage dans le dashboard.
+     */
+    @GetMapping("/personnel/qr")
+    public ResponseEntity<List<Map<String, Object>>> getPersonnelAvecQr() {
+        Employeur emp = getEmployeur(SecurityContextHolder.getContext().getAuthentication().getName());
+        java.util.Set<Site> sites = emp.getSites();
+        if (sites == null || sites.isEmpty()) return ResponseEntity.ok(List.of());
+        List<UUID> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
+
+        List<Map<String, Object>> response = affectationRepository.findAllByStatut("ACTIVE").stream()
+                .filter(a -> a.getPoste() != null && a.getPoste().getSite() != null && siteIds.contains(a.getPoste().getSite().getId()))
+                .map(a -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("agentNom", a.getAgent().getPrenom() + " " + a.getAgent().getNom());
+                    m.put("agentId", a.getAgent().getId().toString());
+                    m.put("posteLibelle", a.getPoste().getEmploi() != null ? a.getPoste().getEmploi().getLibelle() : "Agent Terrain");
+                    m.put("siteNom", a.getPoste().getSite().getNom() != null ? a.getPoste().getSite().getNom() : "—");
+                    m.put("statut", a.getStatut());
+
+                    // Récupération de la carte active de l'agent (le QR code est masqué pour l'employeur)
+                    carteAgentRepository.findByAgentIdAndStatut(a.getAgent().getId(), "ACTIVE").ifPresentOrElse(
+                            carte -> {
+                                m.put("codeQr", ""); // Masqué pour l'employeur
+                                m.put("identifiantNfc", carte.getIdentifiantNfc() != null ? carte.getIdentifiantNfc() : "");
+                                m.put("carteId", carte.getId().toString());
+                                  m.put("carteStatut", carte.getStatut());
+                            },
+                            () -> {
+                                m.put("codeQr", "");
+                                m.put("identifiantNfc", "");
+                                m.put("carteId", "");
+                                m.put("carteStatut", "AUCUNE");
+                            }
+                    );
+                    return m;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ── Pointages ─────────────────────────────────────────────────────────────
 
     @GetMapping("/pointages/today")
     public ResponseEntity<List<Map<String, Object>>> getPointagesToday() {
-        // Minimal response: only verifies request path and keeps compilation.
-        return ResponseEntity.ok(List.of(Map.of(
-                "message", "Endpoint /pointages/today temporairement simplifié"
-        )));
+        return getPointagesByDate(LocalDate.now());
     }
+
+    @GetMapping("/pointages")
+    public ResponseEntity<List<Map<String, Object>>> getPointages(
+            @RequestParam(required = false)
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+            LocalDate date) {
+        return getPointagesByDate(date != null ? date : LocalDate.now());
+    }
+
+    @GetMapping("/pointages/dates")
+    public ResponseEntity<List<Map<String, Object>>> getPointageDates() {
+        Employeur emp = getEmployeur(SecurityContextHolder.getContext().getAuthentication().getName());
+        java.util.Set<Site> sites = emp.getSites();
+        if (sites == null || sites.isEmpty()) return ResponseEntity.ok(List.of());
+
+        List<UUID> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
+        List<Object[]> datesWithCounts = pointageRepository.findPointageDatesWithCountsForSites(siteIds);
+
+        List<Map<String, Object>> response = new ArrayList<>();
+        for (Object[] row : datesWithCounts) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("date", row[0] != null ? row[0].toString() : null);
+            map.put("total", row[1]);
+            response.add(map);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    private ResponseEntity<List<Map<String, Object>>> getPointagesByDate(LocalDate date) {
+        Employeur emp = getEmployeur(SecurityContextHolder.getContext().getAuthentication().getName());
+        java.util.Set<Site> sites = emp.getSites();
+        if (sites == null || sites.isEmpty()) return ResponseEntity.ok(List.of());
+        List<UUID> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
+
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.plusDays(1).atStartOfDay();
+
+        List<Map<String, Object>> response = pointageRepository
+                .findByDateHeureEntreeBetweenOrderByDateHeureEntreeDesc(start, end).stream()
+                .filter(p -> p.getAffectation() != null
+                        && p.getAffectation().getPoste() != null
+                        && p.getAffectation().getPoste().getSite() != null
+                        && siteIds.contains(p.getAffectation().getPoste().getSite().getId()))
+                .map(p -> {
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("id", p.getId());
+                    map.put("agent_nom", p.getAffectation().getAgent().getPrenom() + " " + p.getAffectation().getAgent().getNom());
+                    map.put("heure_entree", p.getDateHeureEntree());
+                    map.put("heure_sortie", p.getDateHeureSortie());
+                    map.put("statut", p.getStatut());
+                    return map;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ── Statistiques ──────────────────────────────────────────────────────────
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
-        // Minimal KPI response.
-        LocalDate today = LocalDate.now();
-        return ResponseEntity.ok(Map.of(
-                "message", "Stats temporaires",
-                "date", today.toString()
-        ));
+        Employeur emp = getEmployeur(SecurityContextHolder.getContext().getAuthentication().getName());
+        java.util.Set<Site> sites = emp.getSites();
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        if (sites == null || sites.isEmpty()) {
+            result.put("totalAgents", 0);
+            result.put("pointagesAujourdhui", 0);
+            return ResponseEntity.ok(result);
+        }
+        List<UUID> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
+
+        long totalAgents = affectationRepository.findAllByStatut("ACTIVE").stream()
+                .filter(a -> a.getPoste() != null && a.getPoste().getSite() != null && siteIds.contains(a.getPoste().getSite().getId()))
+                .count();
+
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay();
+        long pointagesAujourdhui = pointageRepository.findByDateHeureEntreeBetweenOrderByDateHeureEntreeDesc(start, end).stream()
+                .filter(p -> p.getAffectation() != null
+                        && p.getAffectation().getPoste() != null
+                        && p.getAffectation().getPoste().getSite() != null
+                        && siteIds.contains(p.getAffectation().getPoste().getSite().getId()))
+                .count();
+
+        result.put("totalAgents", totalAgents);
+        result.put("pointagesAujourdhui", pointagesAujourdhui);
+        return ResponseEntity.ok(result);
     }
+
+    // ── Scanner ───────────────────────────────────────────────────────────────
 
     @PostMapping("/pointages/scanner")
     public ResponseEntity<?> scanner(@RequestBody Map<String, Object> payload) {
-        // Minimal scanner implementation: validates payload and returns OK.
-        // The full pointage persistence flow will be reintroduced after entity getter/setter sync.
         Object qrObj = payload.get("qrCode");
         if (qrObj == null) qrObj = payload.get("cardId");
+        if (qrObj == null) qrObj = payload.get("identifiantNfc");
+        if (qrObj == null) qrObj = payload.get("sourceBiometrie");
 
         Object typeObj = payload.get("type");
         if (typeObj == null) typeObj = payload.get("typePointage");
 
         if (!(qrObj instanceof String) || ((String) qrObj).isBlank() || !(typeObj instanceof String)) {
-            return ResponseEntity.badRequest().body(Map.of("error", "QR Code et type manquants"));
+            return ResponseEntity.badRequest().body(Map.of("error", "QR Code/ID de carte et type de pointage manquants"));
         }
 
         String cardId = (String) qrObj;
@@ -117,34 +258,51 @@ public class EmployeurController {
             return ResponseEntity.badRequest().body(Map.of("error", "Contexte tenant non disponible"));
         }
 
-        Entreprise entreprise = entrepriseRepository.findById(entrepriseId)
-                .orElseThrow(() -> new IllegalArgumentException("Entreprise non trouvée"));
-
-        // mode determines how we resolve the card
         String mode = (String) payload.get("mode");
         if (mode == null) mode = "QR_CODE";
 
-        Optional<CarteAgent> carteOpt;
-        if ("NFC".equalsIgnoreCase(mode)) {
-            carteOpt = carteAgentRepository.findByIdentifiantNfcAndStatut(cardId, "ACTIVE");
-        } else if ("BIOMETRIE".equalsIgnoreCase(mode)) {
-            carteOpt = carteAgentRepository.findBySourceBiometrieAndStatut(cardId, "ACTIVE");
-        } else {
-            carteOpt = carteAgentRepository.findByCodeQrAndStatut(cardId, "ACTIVE");
+        try {
+            Pointage pointage = pointageService.scannerCarte(cardId, typePointage, mode);
+            
+            // Appliquer les extras
+            if (payload.get("anomalie") != null) pointage.setAnomalie((String) payload.get("anomalie"));
+            if (payload.get("selfieUrl") != null) pointage.setSelfieUrl((String) payload.get("selfieUrl"));
+            if (payload.get("identifiantNfc") != null) pointage.setIdentifiantNfc((String) payload.get("identifiantNfc"));
+            if (payload.get("sourceBiometrie") != null) pointage.setSourceBiometrie((String) payload.get("sourceBiometrie"));
+            if (payload.get("latitude") != null && payload.get("longitude") != null) {
+                java.math.BigDecimal lat = new java.math.BigDecimal(payload.get("latitude").toString());
+                java.math.BigDecimal lng = new java.math.BigDecimal(payload.get("longitude").toString());
+                if (pointage.getDateHeureSortie() == null) {
+                    pointage.setLatitudeEntree(lat);
+                    pointage.setLongitudeEntree(lng);
+                } else {
+                    pointage.setLatitudeSortie(lat);
+                    pointage.setLongitudeSortie(lng);
+                }
+            }
+            if (pointage.getDateHeureSortie() != null && pointage.getDateHeureEntree() != null) {
+                pointage.setDureeMinutes((int) java.time.Duration.between(pointage.getDateHeureEntree(), pointage.getDateHeureSortie()).toMinutes());
+            }
+            
+            pointageRepository.save(pointage);
+
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("message", "Pointage enregistré avec succès — Mode " + mode + " / " + typePointage);
+            res.put("id", pointage.getId());
+            res.put("agentNom", pointage.getAffectation().getAgent().getPrenom() + " " + pointage.getAffectation().getAgent().getNom());
+            res.put("heureEntree", pointage.getDateHeureEntree());
+            res.put("heureSortie", pointage.getDateHeureSortie());
+            res.put("statut", pointage.getStatut());
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage() != null ? e.getMessage() : "Erreur lors du pointage"));
         }
+    }
 
-        if (carteOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Carte non trouvée ou inactive"));
-        }
+    // ── Utilitaire privé ─────────────────────────────────────────────────────
 
-        CarteAgent carte = carteOpt.get();
-
-        // Minimal persistence for now: keep working for pointages without reintroducing broken getters.
-        // We still respond with identifiers so the front can validate.
-        return ResponseEntity.ok(Map.of(
-                "message", "Pointage reçu (safe) — " + mode + " / " + typePointage,
-                "mode", mode
-        ));
+    private Employeur getEmployeur(String email) {
+        return (Employeur) utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Employeur non trouvé : " + email));
     }
 }
-

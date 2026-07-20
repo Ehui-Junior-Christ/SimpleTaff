@@ -1,7 +1,6 @@
 package com.siege.platform.invitation;
 
 import com.siege.platform.common.enums.FormuleAbonnement;
-import com.siege.platform.common.enums.Role;
 import com.siege.platform.common.enums.StatutUtilisateur;
 import com.siege.platform.entreprise.Entreprise;
 import com.siege.platform.entreprise.EntrepriseRepository;

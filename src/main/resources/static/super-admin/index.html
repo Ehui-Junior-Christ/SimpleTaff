@@ -70,19 +70,43 @@
 
         <div class="flex-1 overflow-y-auto p-8 space-y-6">
 
-            <!-- KPI Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div class="glass p-6 rounded-2xl">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Entreprises Actives</p>
-                    <div class="text-3xl font-extrabold text-slate-900 mt-1" id="statActives">—</div>
+            <!-- KPI Stats Cards with Glassmorphism & Micro-Hover -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass p-6 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Entreprises Actives</span>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900 mt-3" id="statActives">—</div>
+                    <div class="flex items-center gap-1.5 mt-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Comptes opérationnels</span>
+                    </div>
                 </div>
-                <div class="glass p-6 rounded-2xl">
-                    <p class="text-xs font-bold text-slate-400 uppercase">En attente d'inscription</p>
-                    <div class="text-3xl font-extrabold text-amber-500 mt-1" id="statPending">—</div>
+                <div class="glass p-6 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">En attente / Inactifs</span>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-amber-600 mt-3" id="statPending">—</div>
+                    <div class="flex items-center gap-1.5 mt-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Invitations ou suspendus</span>
+                    </div>
                 </div>
-                <div class="glass p-6 rounded-2xl">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Total Tenants</p>
-                    <div class="text-3xl font-extrabold text-indigo-600 mt-1" id="statTotal">—</div>
+                <div class="glass p-6 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Tenants</span>
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-indigo-600 mt-3" id="statTotal">—</div>
+                    <div class="flex items-center gap-1.5 mt-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700">Volume total SaaS</span>
+                    </div>
                 </div>
             </div>
 
@@ -248,33 +272,43 @@
             try {
                 const data = await apiFetch('/superadmin/entreprises');
                 const actives = data.filter(e => e.statut === 'ACTIF' || e.statut === 'ACTIVE').length;
-                const pending = data.filter(e => e.statut === 'INACTIF').length;
+                const pending = data.filter(e => e.statut === 'INACTIF' || e.statut === 'SUSPENDUE').length;
                 document.getElementById('statActives').textContent = actives;
                 document.getElementById('statPending').textContent = pending;
                 document.getElementById('statTotal').textContent = data.length;
 
                 tbody.innerHTML = data.map(e => {
-                    let statusColor = 'bg-red-100 text-red-700';
+                    let statusColor = 'bg-rose-100 text-rose-700';
                     if (e.statut === 'ACTIF' || e.statut === 'ACTIVE') {
-                        statusColor = 'bg-green-100 text-green-700';
+                        statusColor = 'bg-emerald-100 text-emerald-700';
                     } else if (e.statut === 'INACTIF') {
                         statusColor = 'bg-amber-100 text-amber-700';
                     } else if (e.statut === 'SUSPENDUE') {
-                        statusColor = 'bg-red-100 text-red-700';
+                        statusColor = 'bg-rose-100 text-rose-700';
                     }
 
                     const isActif = e.statut === 'ACTIF' || e.statut === 'ACTIVE';
                     const actionBtn = isActif 
-                        ? `<button onclick="toggleEntreprise('${e.id}', 'suspendre')" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-3 rounded-lg mr-2 transition-colors">Suspendre</button>`
-                        : `<button onclick="toggleEntreprise('${e.id}', 'activer')" class="text-xs bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-lg mr-2 transition-colors">Activer</button>`;
+                        ? `<button onclick="toggleEntreprise('${e.id}', 'suspendre')" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-3 rounded-xl mr-2 transition-all shadow-sm">Suspendre</button>`
+                        : `<button onclick="toggleEntreprise('${e.id}', 'activer')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-xl mr-2 transition-all shadow-sm">Activer</button>`;
 
-                    const deleteBtn = `<button onclick="deleteEntreprise('${e.id}', '${e.nom}')" class="text-xs bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg transition-colors">Supprimer</button>`;
+                    const deleteBtn = `<button onclick="deleteEntreprise('${e.id}', '${e.nom}')" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold py-1.5 px-3 rounded-xl transition-all shadow-sm">Supprimer</button>`;
+
+                    const initiales = (e.nom || 'ENT').split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
 
                     return `
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4 font-bold text-slate-900">${e.nom}</td>
-                        <td class="px-6 py-4"><span class="badge bg-indigo-50 text-indigo-700">${e.formuleAbonnement}</span></td>
-                        <td class="px-6 py-4 text-slate-500">${e.tauxCotisation} %</td>
+                    <tr class="hover:bg-slate-50/60 transition-colors">
+                        <td class="px-6 py-4 flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-sky-500 text-white font-extrabold text-xs flex items-center justify-center shadow-sm">
+                                ${initiales}
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900">${e.nom}</div>
+                                <div class="text-[10px] text-slate-400">ID: ${e.id}</div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4"><span class="badge bg-indigo-50 border border-indigo-100 text-indigo-700">${e.formuleAbonnement || 'PRO'}</span></td>
+                        <td class="px-6 py-4 text-slate-600 font-bold">${e.tauxCotisation || '5.5'} %</td>
                         <td class="px-6 py-4"><span class="badge ${statusColor}">${e.statut}</span></td>
                         <td class="px-6 py-4 flex items-center">${actionBtn}${deleteBtn}</td>
                     </tr>`;

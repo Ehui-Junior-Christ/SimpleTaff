@@ -5,6 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+import java.util.List;
+
 @Repository
 public interface NotificationEvenementRepository extends JpaRepository<NotificationEvenement, UUID> {
+    List<NotificationEvenement> findByStatut(String statut);
+    List<NotificationEvenement> findAllByOrderByCreeLeDesc();
 }

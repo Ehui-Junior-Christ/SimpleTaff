@@ -26,15 +26,21 @@ public class CoordonnateurController {
     private final AffectationRepository affectationRepo;
     private final ZoneRepository zoneRepo;
     private final PointageRepository pointageRepo;
+    private final com.siege.platform.agent.AgentTerrainService agentTerrainService;
+    private final com.siege.platform.pointage.CarteAgentRepository carteAgentRepository;
 
     public CoordonnateurController(AgentTerrainRepository agentRepo,
                                     AffectationRepository affectationRepo,
                                     ZoneRepository zoneRepo,
-                                    PointageRepository pointageRepo) {
+                                    PointageRepository pointageRepo,
+                                    com.siege.platform.agent.AgentTerrainService agentTerrainService,
+                                    com.siege.platform.pointage.CarteAgentRepository carteAgentRepository) {
         this.agentRepo = agentRepo;
         this.affectationRepo = affectationRepo;
         this.zoneRepo = zoneRepo;
         this.pointageRepo = pointageRepo;
+        this.agentTerrainService = agentTerrainService;
+        this.carteAgentRepository = carteAgentRepository;
     }
 
     @GetMapping("/stats")
@@ -51,8 +57,17 @@ public class CoordonnateurController {
 
     @GetMapping("/agents")
     public ResponseEntity<List<Map<String, Object>>> getAgents() {
-        List<AgentTerrain> agents = agentRepo.findAll();
+        List<AgentTerrain> agents = agentTerrainService.listAll();
         List<Map<String, Object>> result = new ArrayList<>();
+        
+        List<com.siege.platform.pointage.CarteAgent> cartes = carteAgentRepository.findAll();
+        Map<UUID, String> agentQrMap = new HashMap<>();
+        for (com.siege.platform.pointage.CarteAgent c : cartes) {
+            if ("ACTIVE".equals(c.getStatut())) {
+                agentQrMap.put(c.getAgent().getId(), c.getCodeQr());
+            }
+        }
+
         for (AgentTerrain a : agents) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("id", a.getId());
@@ -61,6 +76,13 @@ public class CoordonnateurController {
             map.put("contact", a.getContact());
             map.put("statut", a.getStatut());
             map.put("zoneNom", a.getZone() != null ? a.getZone().getNom() : null);
+            
+            String qr = agentQrMap.get(a.getId());
+            if (qr == null || !qr.startsWith("eyJ")) {
+                qr = agentTerrainService.getOrCreateActiveCard(a);
+            }
+            map.put("codeQr", qr);
+            
             result.add(map);
         }
         return ResponseEntity.ok(result);
@@ -128,7 +150,7 @@ public class CoordonnateurController {
 
     private String resolveAgentNom(Affectation affectation) {
         if (affectation == null || affectation.getAgent() == null) {
-            return null;
+            return "N/A";
         }
         return affectation.getAgent().getNom() + " " + affectation.getAgent().getPrenom();
     }

@@ -48,7 +48,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // log
+            e.printStackTrace();
         }
 
         try {
@@ -59,6 +59,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Parse and extract JWT from Authorization header.
+     * @param request the HTTP request
+     * @return the JWT token, or null if Authorization header is not present or doesn't start with Bearer
+     */
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {

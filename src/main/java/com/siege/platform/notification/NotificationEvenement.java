@@ -1,5 +1,7 @@
 package com.siege.platform.notification;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.siege.platform.entreprise.Entreprise;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,11 +16,13 @@ import java.util.UUID;
 @Getter
 @Setter
 @Filter(name = "tenantFilter", condition = "entreprise_id = :entrepriseId")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class NotificationEvenement {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entreprise_id")
     private Entreprise entreprise;
@@ -35,6 +39,6 @@ public class NotificationEvenement {
     @Column(nullable = false)
     private String statut = "A_ENVOYER";
 
-    @Column(nullable = false)
+    @Column(name = "date_creation", nullable = false)
     private LocalDateTime creeLe = LocalDateTime.now();
 }

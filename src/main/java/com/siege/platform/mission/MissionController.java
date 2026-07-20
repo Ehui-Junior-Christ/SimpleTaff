@@ -48,8 +48,8 @@ public class MissionController {
         mission.setObjectifs((String) payload.get("objectifs"));
         mission.setLocalisationLat(decimal(payload.get("localisationLat")));
         mission.setLocalisationLng(decimal(payload.get("localisationLng")));
-        mission.setPlanningDebut(dateTime(payload.get("planningDebut")));
-        mission.setPlanningFin(dateTime(payload.get("planningFin")));
+        mission.setPlanningDebut(date(payload.get("planningDebut")));
+        mission.setPlanningFin(date(payload.get("planningFin")));
         return ResponseEntity.ok(toMap(missionRepository.save(mission)));
     }
 
@@ -99,7 +99,14 @@ public class MissionController {
         return value == null || value.toString().isBlank() ? null : new BigDecimal(value.toString());
     }
 
-    private LocalDateTime dateTime(Object value) {
-        return value == null || value.toString().isBlank() ? null : LocalDateTime.parse(value.toString());
+    private java.time.LocalDate date(Object value) {
+        if (value == null || value.toString().isBlank()) {
+            return null;
+        }
+        String valStr = value.toString();
+        if (valStr.contains("T")) {
+            return java.time.LocalDateTime.parse(valStr).toLocalDate();
+        }
+        return java.time.LocalDate.parse(valStr);
     }
 }

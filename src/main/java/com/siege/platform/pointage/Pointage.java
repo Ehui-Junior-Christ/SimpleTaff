@@ -1,5 +1,7 @@
 package com.siege.platform.pointage;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.siege.platform.entreprise.Entreprise;
 import com.siege.platform.poste.Affectation;
 import com.siege.platform.utilisateur.Employeur;
@@ -17,20 +19,24 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Filter(name = "tenantFilter", condition = "entreprise_id = :entrepriseId")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Pointage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entreprise_id", nullable = false)
     private Entreprise entreprise;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "affectation_id", nullable = false)
     private Affectation affectation;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "carte_scannee_id", nullable = false)
     private CarteAgent carteScannee;
@@ -69,6 +75,7 @@ public class Pointage {
 
     private String sourceBiometrie;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "valide_par_employeur_id")
     private Employeur valideParEmployeur;

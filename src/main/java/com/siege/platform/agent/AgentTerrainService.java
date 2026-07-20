@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -96,6 +97,32 @@ public class AgentTerrainService {
         agent.setContactUrgenceNom(payload.get("contactUrgenceNom"));
         agent.setContactUrgenceTelephone(payload.get("contactUrgenceTelephone"));
         agent.setContactUrgenceLien(payload.get("contactUrgenceLien"));
+
+        // Generate automatic matricule
+        String matricule = "AGT-" + java.time.LocalDate.now().getYear() + "-" + java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        agent.setMatricule(matricule);
+
+        agent.setPhotoUrl(payload.get("photoUrl"));
+        agent.setGenre(payload.get("genre"));
+        if (payload.get("dateNaissance") != null && !payload.get("dateNaissance").trim().isEmpty()) {
+            agent.setDateNaissance(java.time.LocalDate.parse(payload.get("dateNaissance").trim()));
+        }
+        agent.setLieuNaissance(payload.get("lieuNaissance"));
+        agent.setNationalite(payload.get("nationalite"));
+        agent.setAdresse(payload.get("adresse"));
+        agent.setCommune(payload.get("commune"));
+        agent.setVille(payload.get("ville"));
+        agent.setEmail(payload.get("email"));
+
+        // Re-generate or update the active card codeQr to include matricule in signed token
+        Optional<CarteAgent> cardOpt = carteAgentRepository.findByAgentIdAndStatut(agent.getId(), "ACTIVE");
+        if (cardOpt.isPresent()) {
+            CarteAgent card = cardOpt.get();
+            String agentFullName = agent.getNom() + " " + agent.getPrenom();
+            card.setCodeQr(qrCodeUtil.generateQRCode(agent.getId(), agentFullName));
+            carteAgentRepository.save(card);
+        }
+
         return agentTerrainRepository.save(agent);
     }
 
@@ -104,5 +131,51 @@ public class AgentTerrainService {
             return 0;
         }
         return Integer.parseInt(value);
+    }
+
+    @Transactional
+    public String getOrCreateActiveCard(AgentTerrain agent) {
+        Optional<CarteAgent> activeCardOpt = carteAgentRepository.findByAgentIdAndStatut(agent.getId(), "ACTIVE");
+        if (activeCardOpt.isPresent()) {
+            String qr = activeCardOpt.get().getCodeQr();
+            if (qr != null && qr.startsWith("eyJ")) {
+                return qr;
+            }
+            // Deactivate old invalid card
+            CarteAgent old = activeCardOpt.get();
+            old.setStatut("INACTIVE");
+            carteAgentRepository.saveAndFlush(old);
+        }
+        // Generate new signed card
+        CarteAgent carte = new CarteAgent();
+        carte.setAgent(agent);
+        String agentFullName = agent.getNom() + " " + agent.getPrenom();
+        String signedQRCode = qrCodeUtil.generateQRCode(agent.getId(), agentFullName);
+        carte.setCodeQr(signedQRCode);
+        carte.setStatut("ACTIVE");
+        carteAgentRepository.saveAndFlush(carte);
+        return signedQRCode;
+    }
+    @Transactional
+    public void configurerCarte(UUID agentId, String identifiantNfc, String sourceBiometrie) {
+        CarteAgent carte = carteAgentRepository.findByAgentIdAndStatut(agentId, "ACTIVE")
+                .orElseGet(() -> {
+                    AgentTerrain agent = agentTerrainRepository.findById(agentId)
+                            .orElseThrow(() -> new IllegalArgumentException("Agent introuvable."));
+                    CarteAgent newCarte = new CarteAgent();
+                    newCarte.setAgent(agent);
+                    String agentFullName = agent.getNom() + " " + agent.getPrenom();
+                    newCarte.setCodeQr(qrCodeUtil.generateQRCode(agent.getId(), agentFullName));
+                    newCarte.setStatut("ACTIVE");
+                    return newCarte;
+                });
+
+        if (identifiantNfc != null) {
+            carte.setIdentifiantNfc(identifiantNfc.trim().isEmpty() ? null : identifiantNfc.trim());
+        }
+        if (sourceBiometrie != null) {
+            carte.setSourceBiometrie(sourceBiometrie.trim().isEmpty() ? null : sourceBiometrie.trim());
+        }
+        carteAgentRepository.save(carte);
     }
 }

@@ -5,6 +5,7 @@ import com.siege.platform.utilisateur.Utilisateur;
 import com.siege.platform.utilisateur.UtilisateurRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CurrentTenantService {
@@ -15,6 +16,7 @@ public class CurrentTenantService {
         this.utilisateurRepository = utilisateurRepository;
     }
 
+    @Transactional(readOnly = true)
     public Entreprise entreprise() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Utilisateur user = utilisateurRepository.findByEmail(email)
@@ -25,3 +27,4 @@ public class CurrentTenantService {
         return user.getEntreprise();
     }
 }
+

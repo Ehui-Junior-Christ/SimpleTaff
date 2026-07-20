@@ -1,0 +1,36 @@
+﻿  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.0)
+
+2026-07-19T10:17:28.724Z  INFO 23536 --- [platform] [           main] com.siege.platform.PlatformApplication   : Starting PlatformApplication using Java 21.0.10 with PID 23536 (C:\Users\junio\Downloads\memoire\SimpleTaff\target\classes started by junio in C:\Users\junio\Downloads\memoire\SimpleTaff)
+2026-07-19T10:17:28.728Z  INFO 23536 --- [platform] [           main] com.siege.platform.PlatformApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-07-19T10:17:31.645Z  INFO 23536 --- [platform] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-19T10:17:32.073Z  INFO 23536 --- [platform] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 406 ms. Found 32 JPA repository interfaces.
+2026-07-19T10:17:34.675Z  INFO 23536 --- [platform] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-07-19T10:17:34.707Z  INFO 23536 --- [platform] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-19T10:17:34.708Z  INFO 23536 --- [platform] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.24]
+2026-07-19T10:17:34.962Z  INFO 23536 --- [platform] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-07-19T10:17:34.964Z  INFO 23536 --- [platform] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 6117 ms
+2026-07-19T10:17:35.502Z  INFO 23536 --- [platform] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-19T10:17:35.760Z  INFO 23536 --- [platform] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-07-19T10:17:35.849Z  INFO 23536 --- [platform] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-19T10:17:37.653Z  INFO 23536 --- [platform] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-19T10:17:37.729Z  INFO 23536 --- [platform] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-19T10:17:38.451Z  INFO 23536 --- [platform] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4ac19bc6
+2026-07-19T10:17:38.455Z  INFO 23536 --- [platform] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-19T10:17:38.848Z  WARN 23536 --- [platform] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-19T10:17:43.956Z  INFO 23536 --- [platform] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-19T10:17:45.120Z  INFO 23536 --- [platform] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-19T10:17:45.924Z  INFO 23536 --- [platform] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-19T10:17:47.912Z  INFO 23536 --- [platform] [           main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-07-19T10:17:47.914Z  WARN 23536 --- [platform] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-07-19T10:17:49.698Z  WARN 23536 --- [platform] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-19T10:17:50.160Z  INFO 23536 --- [platform] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-07-19T10:17:51.138Z  INFO 23536 --- [platform] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@37b117dd, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@388b4f68, org.springframework.security.web.context.SecurityContextHolderFilter@ff5aa42, org.springframework.security.web.header.HeaderWriterFilter@150cc1ea, org.springframework.web.filter.CorsFilter@46805e99, org.springframework.security.web.authentication.logout.LogoutFilter@24d02ed9, com.siege.platform.config.security.AuthTokenFilter@1cea4fdf, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@488897ef, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@50cbe633, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@58decd96, org.springframework.security.web.session.SessionManagementFilter@26a8eaaa, org.springframework.security.web.access.ExceptionTranslationFilter@13389f4e, org.springframework.security.web.access.intercept.AuthorizationFilter@112dfb03]
+2026-07-19T10:17:52.254Z  INFO 23536 --- [platform] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-07-19T10:17:52.300Z  INFO 23536 --- [platform] [           main] com.siege.platform.PlatformApplication   : Started PlatformApplication in 24.763 seconds (process running for 25.815)

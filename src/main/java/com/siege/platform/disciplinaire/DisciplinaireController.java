@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.*;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @RestController
 @RequestMapping("/api/disciplinaire")
-@PreAuthorize("hasAnyRole('ADMIN_ENTREPRISE', 'SUPER_ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN_ENTREPRISE', 'SUPER_ADMIN', 'EMPLOYEUR', 'COORDONNATEUR')")
+@Transactional
 public class DisciplinaireController {
     private final SanctionRepository sanctionRepository;
     private final AgentTerrainRepository agentRepository;
@@ -31,6 +34,7 @@ public class DisciplinaireController {
     }
 
     @PostMapping("/sanctions")
+    @PreAuthorize("hasAnyRole('ADMIN_ENTREPRISE', 'SUPER_ADMIN')")
     public ResponseEntity<?> create(@RequestBody Map<String, Object> payload) {
         Sanction sanction = new Sanction();
         sanction.setEntreprise(tenantService.entreprise());
