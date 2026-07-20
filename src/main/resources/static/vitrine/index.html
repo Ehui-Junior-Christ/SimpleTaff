@@ -216,7 +216,7 @@
                     <li class="flex gap-2">✓ Pointage QR Code</li>
                     <li class="flex gap-2">✓ 1 coordonnateur</li>
                 </ul>
-                <a href="/vitrine/login.html" class="block text-center glass rounded-xl py-2.5 text-sm font-medium hover:bg-white/10 transition-colors">Choisir Starter</a>
+                <a href="/vitrine/contact-souscription.html?plan=Starter" class="block text-center glass rounded-xl py-2.5 text-sm font-medium hover:bg-white/10 transition-colors">Choisir Starter</a>
             </div>
             <div class="rounded-2xl p-6 card-hover relative" style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(99,102,241,0.4);">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500 px-3 py-1 rounded-full text-xs font-medium">Recommandé</div>
@@ -229,7 +229,7 @@
                     <li class="flex gap-2">✓ Facturation client</li>
                     <li class="flex gap-2">✓ Coordonnateurs illimités</li>
                 </ul>
-                <a href="/vitrine/login.html" class="block text-center btn-primary rounded-xl py-2.5 text-sm font-medium">Choisir Pro</a>
+                <a href="/vitrine/contact-souscription.html?plan=Pro" class="block text-center btn-primary rounded-xl py-2.5 text-sm font-medium">Choisir Pro</a>
             </div>
             <div class="glass rounded-2xl p-6 card-hover">
                 <p class="text-white/40 text-sm mb-2">Enterprise</p>
@@ -241,7 +241,50 @@
                     <li class="flex gap-2">✓ Intégration sur mesure</li>
                     <li class="flex gap-2">✓ Support dédié</li>
                 </ul>
-                <a href="mailto:contact@simpletaff.ci" class="block text-center glass rounded-xl py-2.5 text-sm font-medium hover:bg-white/10 transition-colors">Nous contacter</a>
+                <a href="/vitrine/contact-souscription.html?plan=Enterprise" class="block text-center glass rounded-xl py-2.5 text-sm font-medium hover:bg-white/10 transition-colors">Nous contacter</a>
+            </div>
+        </div>
+
+        <!-- SIMULATEUR DE DEVIS -->
+        <div class="mt-16 glass rounded-3xl p-8 border border-white/10 max-w-3xl mx-auto">
+            <div class="text-center mb-8">
+                <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Simulateur Budget</span>
+                <h3 class="text-2xl font-bold mt-1">Estimez votre abonnement & obtenez un devis</h3>
+                <p class="text-white/40 text-sm mt-2">Ajustez le curseur selon vos effectifs pour voir la formule adaptée.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-white/70 mb-2 flex justify-between">
+                            <span>Nombre d'agents à gérer :</span>
+                            <span id="agent-count-val" class="font-bold text-indigo-400 text-lg">50 agents</span>
+                        </label>
+                        <input id="agent-slider" type="range" min="5" max="300" value="50" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        <div class="flex justify-between text-xs text-white/30 mt-1">
+                            <span>5 agents</span>
+                            <span>150 agents</span>
+                            <span>300+ agents</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="block text-sm font-medium text-white/70 mb-2">Formule recommandée :</span>
+                        <div id="recommended-badge" class="inline-block bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-3.5 py-1.5 rounded-full text-sm font-semibold">
+                            Formule Pro
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl p-6 border border-white/5 bg-white/5 text-center space-y-4">
+                    <p class="text-white/40 text-xs uppercase tracking-wider">Coût mensuel estimé</p>
+                    <p id="estimated-cost" class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">120 000 FCFA</p>
+                    <p class="text-white/30 text-xs">Abonnement sans engagement, résiliable à tout moment.</p>
+                    
+                    <button onclick="openDevisModal()" class="w-full btn-primary py-3 rounded-xl font-bold text-sm text-white transition-all">
+                        Obtenir un Devis Officiel
+                    </button>
+                </div>
             </div>
         </div>
     </section>
@@ -266,6 +309,63 @@
         <p>© 2026 SimpleTaff. Tous droits réservés. — Conçu avec ❤️ pour les agences ivoiriennes.</p>
     </footer>
 
+    <!-- DEVIS MODAL -->
+    <div id="devis-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass rounded-3xl p-8 max-w-md w-full border border-white/15 mx-4 relative">
+            <button onclick="closeDevisModal()" class="absolute top-4 right-4 text-white/40 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-bold">Votre Devis Estimatif</h3>
+                <p class="text-white/50 text-sm mt-1">Remplissez les informations ci-dessous pour recevoir votre devis officiel PDF par e-mail.</p>
+            </div>
+            <form id="devis-form" onsubmit="submitDevis(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-white/60 mb-1">Nom de l'entreprise</label>
+                    <input type="text" required placeholder="Ex: Bolloré Côte d'Ivoire" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-white/60 mb-1">Votre Nom complet</label>
+                    <input type="text" required placeholder="Ex: Jean Koffi" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-white/60 mb-1">Adresse e-mail</label>
+                    <input type="email" required placeholder="Ex: contact@entreprise.ci" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-white/60 mb-1">Téléphone</label>
+                    <input type="tel" required placeholder="Ex: +225 07 00 00 00 00" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                </div>
+                <div class="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3 text-xs text-indigo-300">
+                    <span class="font-bold">Estimation sélectionnée :</span> <span id="modal-summary">Formule Pro (50 agents) - 120 000 FCFA/mois</span>
+                </div>
+                <button type="submit" class="w-full btn-primary py-3 rounded-xl font-bold text-sm text-white">
+                    Générer et envoyer le devis
+                </button>
+            </form>
+            <div id="devis-success" class="hidden text-center py-6 space-y-4">
+                <div class="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <h4 class="text-xl font-bold">Devis envoyé avec succès !</h4>
+                <p class="text-white/50 text-sm">Un e-mail contenant le devis officiel PDF a été envoyé à l'adresse indiquée.</p>
+                <div class="bg-white/5 border border-white/10 rounded-xl p-4 text-left text-xs space-y-2">
+                    <div class="flex justify-between"><span class="text-white/40">Numéro de Devis :</span> <span class="font-mono text-indigo-300">DEVIS-2026-0042</span></div>
+                    <div class="flex justify-between"><span class="text-white/40">Destinataire :</span> <span id="success-email">contact@entreprise.ci</span></div>
+                    <div class="flex justify-between"><span class="text-white/40">Total Mensuel :</span> <span id="success-cost" class="font-bold">120 000 FCFA</span></div>
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <a href="#" id="download-devis-btn" onclick="downloadMockDevisPdf(event)" class="flex-1 text-center btn-primary py-2.5 rounded-xl font-semibold text-xs text-white">
+                        Télécharger le PDF
+                    </a>
+                    <button onclick="closeDevisModal()" class="flex-1 glass py-2.5 rounded-xl font-semibold text-xs text-white/70 hover:text-white">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -279,6 +379,99 @@
             entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('fade-up'); });
         }, { threshold: 0.1 });
         document.querySelectorAll('.card-hover').forEach(el => observer.observe(el));
+
+        // Devis Simulator Logic
+        const agentSlider = document.getElementById('agent-slider');
+        const agentCountVal = document.getElementById('agent-count-val');
+        const recommendedBadge = document.getElementById('recommended-badge');
+        const estimatedCost = document.getElementById('estimated-cost');
+        const modalSummary = document.getElementById('modal-summary');
+
+        function updatePricing() {
+            const count = parseInt(agentSlider.value);
+            agentCountVal.textContent = `${count} agent${count > 1 ? 's' : ''}`;
+            
+            let formula = '';
+            let price = '';
+            if (count <= 30) {
+                formula = 'Formule Starter';
+                price = '49 000 FCFA';
+            } else if (count <= 150) {
+                formula = 'Formule Pro';
+                price = '120 000 FCFA';
+            } else {
+                formula = 'Formule Enterprise';
+                price = 'Sur devis';
+            }
+            
+            recommendedBadge.textContent = formula;
+            estimatedCost.textContent = price;
+            modalSummary.textContent = `${formula} (${count} agents) - ${price}/mois`;
+        }
+
+        if (agentSlider) {
+            agentSlider.addEventListener('input', updatePricing);
+            updatePricing();
+        }
+
+        // Modal Operations
+        const devisModal = document.getElementById('devis-modal');
+        function openDevisModal() {
+            devisModal.classList.remove('hidden');
+            setTimeout(() => {
+                devisModal.classList.remove('opacity-0');
+            }, 50);
+        }
+        function closeDevisModal() {
+            devisModal.classList.add('opacity-0');
+            setTimeout(() => {
+                devisModal.classList.add('hidden');
+                document.getElementById('devis-form').classList.remove('hidden');
+                document.getElementById('devis-success').classList.add('hidden');
+            }, 300);
+        }
+        function submitDevis(event) {
+            event.preventDefault();
+            const email = event.target.querySelector('input[type="email"]').value;
+            document.getElementById('success-email').textContent = email;
+            document.getElementById('success-cost').textContent = estimatedCost.textContent;
+            
+            document.getElementById('devis-form').classList.add('hidden');
+            document.getElementById('devis-success').classList.remove('hidden');
+        }
+        function downloadMockDevisPdf(e) {
+            e.preventDefault();
+            const companyName = document.querySelector('#devis-form input[type="text"]').value || "Votre Entreprise";
+            const agentCount = agentSlider.value;
+            const cost = estimatedCost.textContent;
+            const formula = recommendedBadge.textContent;
+            
+            let pdfText = `====================================================\n`;
+            pdfText += `               DEVIS OFFICIEL - SIMPLETTAFF          \n`;
+            pdfText += `====================================================\n`;
+            pdfText += `Numéro : DEVIS-2026-0042\n`;
+            pdfText += `Date   : ${new Date().toLocaleDateString('fr-FR')}\n`;
+            pdfText += `Validité : 30 jours\n\n`;
+            pdfText += `Destinataire :\n`;
+            pdfText += `  Entreprise : ${companyName}\n\n`;
+            pdfText += `Détails de l'offre :\n`;
+            pdfText += `  - Formule : ${formula}\n`;
+            pdfText += `  - Capacité : Jusqu'à ${agentCount} agents gérés\n`;
+            pdfText += `  - Hébergement & Support inclus\n`;
+            pdfText += `  - Configuration initiale : Offerte (Frais d'installation : 0 FCFA)\n\n`;
+            pdfText += `----------------------------------------------------\n`;
+            pdfText += `TOTAL MENSUEL : ${cost} / mois HT\n`;
+            pdfText += `----------------------------------------------------\n\n`;
+            pdfText += `Merci pour votre confiance.\n`;
+            pdfText += `SimpleTaff Platform - www.simpletaff.ci\n`;
+            pdfText += `====================================================\n`;
+
+            const blob = new Blob([pdfText], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `devis_simpletaff_${companyName.toLowerCase().replace(/\s+/g, '_')}.txt`;
+            link.click();
+        }
     </script>
 </body>
 </html>

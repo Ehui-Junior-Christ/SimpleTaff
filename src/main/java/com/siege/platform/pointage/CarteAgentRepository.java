@@ -10,6 +10,10 @@ import java.util.UUID;
 public interface CarteAgentRepository extends JpaRepository<CarteAgent, UUID> {
     Optional<CarteAgent> findByCodeQrAndStatut(String codeQr, String statut);
 
+    Optional<CarteAgent> findByAgentIdAndStatut(UUID agentId, String statut);
+
+    java.util.List<CarteAgent> findByAgentId(UUID agentId);
+
     Optional<CarteAgent> findByIdentifiantNfcAndStatut(String identifiantNfc, String statut);
 
     Optional<CarteAgent> findBySourceBiometrieAndStatut(String sourceBiometrie, String statut);

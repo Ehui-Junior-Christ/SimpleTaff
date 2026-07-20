@@ -1,5 +1,7 @@
 package com.siege.platform.poste;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.siege.platform.agent.AgentTerrain;
 import com.siege.platform.entreprise.Entreprise;
 import com.siege.platform.utilisateur.Utilisateur;
@@ -16,12 +18,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @Filter(name = "tenantFilter", condition = "entreprise_id = :entrepriseId")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Affectation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entreprise_id", nullable = false)
     private Entreprise entreprise;
@@ -48,11 +52,21 @@ public class Affectation {
     @Column(length = 500)
     private String decisionUrl;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responsable_validant_id")
     private Utilisateur responsableValidant;
 
     private String motifFin;
+
+    private String region;
+    private String ville;
+    private String superviseur;
+    private String client;
+    private String mission;
+    private String projet;
+    private String heureArriveeSite;
+    private String heureDepartSite;
 
     @Column(nullable = false)
     private String statut;

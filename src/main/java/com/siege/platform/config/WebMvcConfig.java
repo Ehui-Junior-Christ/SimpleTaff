@@ -24,4 +24,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addViewController("/coordonnateur").setViewName("forward:/coordonnateur/index.html");
         registry.addViewController("/coordonnateur/").setViewName("forward:/coordonnateur/index.html");
     }
+
+    @Override
+    public void addResourceHandlers(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
+    }
 }

@@ -1,0 +1,8 @@
+﻿java.exe : Erreur : impossible de trouver ou de charger la classe principale com.siege.platform.PlatformApplication
+Au caractère Ligne:1 : 27
++ ... ent cp.txt; & "C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspo ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Erreur : imposs...formApplication:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+CausÚ par : java.lang.ClassNotFoundException: com.siege.platform.PlatformApplication

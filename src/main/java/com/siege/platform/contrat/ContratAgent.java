@@ -1,5 +1,7 @@
 package com.siege.platform.contrat;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.siege.platform.agent.AgentTerrain;
 import com.siege.platform.entreprise.Entreprise;
 import com.siege.platform.structuredemandeuse.StructureDemandeuse;
@@ -16,19 +18,23 @@ import java.util.UUID;
 @Getter
 @Setter
 @Filter(name = "tenantFilter", condition = "entreprise_id = :entrepriseId")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ContratAgent {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entreprise_id", nullable = false)
     private Entreprise entreprise;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agent_id", nullable = false)
     private AgentTerrain agent;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "structure_cliente_id")
     private StructureDemandeuse structureCliente;
@@ -42,6 +48,10 @@ public class ContratAgent {
     private LocalDate dateFin;
 
     private String direction;
+
+    private java.math.BigDecimal salaireBase;
+    private String fonction;
+    private String departement;
 
     @Column(nullable = false)
     private String statut = "ACTIF";

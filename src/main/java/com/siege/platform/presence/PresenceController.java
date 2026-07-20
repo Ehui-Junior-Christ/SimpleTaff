@@ -41,8 +41,9 @@ public class PresenceController {
                 rapportService.exportToPdf(rapport) : 
                 rapportService.exportToExcel(rapport);
 
-        String filename = "presences-" + mois + "." + format;
-        MediaType mediaType = "pdf".equals(format) ? MediaType.APPLICATION_PDF : MediaType.TEXT_PLAIN;
+        String fileExtension = "pdf".equals(format) ? "pdf" : "csv";
+        String filename = "presences-" + mois + "." + fileExtension;
+        MediaType mediaType = "pdf".equals(format) ? MediaType.APPLICATION_PDF : MediaType.parseMediaType("text/csv;charset=UTF-8");
 
         return ResponseEntity.ok()
                 .contentType(mediaType)

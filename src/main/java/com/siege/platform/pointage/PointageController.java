@@ -35,8 +35,13 @@ public class PointageController {
             return ResponseEntity.badRequest().body(Map.of("message", "L'identifiant de la carte est requis."));
         }
         
+        String mode = payload.get("mode");
+        if (mode == null || mode.trim().isEmpty()) {
+            mode = "QR_CODE";
+        }
+        
         try {
-            Pointage pointage = pointageService.scannerCarte(cardId, payload.get("typePointage"));
+            Pointage pointage = pointageService.scannerCarte(cardId, payload.get("typePointage"), mode);
             applyPointageExtras(pointage, payload);
             pointageRepository.save(pointage);
             return ResponseEntity.ok(toResponse(pointage));
@@ -133,7 +138,7 @@ public class PointageController {
 
     private String resolveAgentNom(Affectation affectation) {
         if (affectation == null || affectation.getAgent() == null) {
-            return null;
+            return "N/A";
         }
         return affectation.getAgent().getNom() + " " + affectation.getAgent().getPrenom();
     }

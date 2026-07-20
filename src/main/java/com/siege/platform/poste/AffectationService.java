@@ -24,7 +24,7 @@ public class AffectationService {
     }
 
     @Transactional
-    public Affectation creerAffectation(UUID posteId, UUID agentId, LocalDate dateDebut) {
+    public Affectation creerAffectation(UUID posteId, UUID agentId, LocalDate dateDebut, java.util.Map<String, String> payload) {
         // Vérifier la contrainte critique métier
         if (affectationRepository.existsByAgentIdAndStatut(agentId, "ACTIVE")) {
             throw new IllegalStateException("Cet agent possède déjà une affectation active.");
@@ -41,6 +41,20 @@ public class AffectationService {
         affectation.setAgent(agent);
         affectation.setDateDebutOccupation(dateDebut);
         affectation.setStatut("ACTIVE");
+
+        // Map detailed fields
+        if (payload != null) {
+            affectation.setRegion(payload.get("region"));
+            affectation.setVille(payload.get("ville"));
+            affectation.setCommune(payload.get("commune"));
+            affectation.setZoneOperationnelle(payload.get("zoneOperationnelle"));
+            affectation.setSuperviseur(payload.get("superviseur"));
+            affectation.setClient(payload.get("client"));
+            affectation.setMission(payload.get("mission"));
+            affectation.setProjet(payload.get("projet"));
+            affectation.setHeureArriveeSite(payload.get("heureArriveeSite"));
+            affectation.setHeureDepartSite(payload.get("heureDepartSite"));
+        }
 
         poste.setStatut("POURVU");
         posteRepository.save(poste);
@@ -63,8 +77,21 @@ public class AffectationService {
         ancienneAffectation.setDateFinOccupation(dateRemplacement);
         affectationRepository.save(ancienneAffectation);
 
+        // Map existing fields to the replacement where appropriate
+        java.util.Map<String, String> payload = new java.util.HashMap<>();
+        payload.put("region", ancienneAffectation.getRegion());
+        payload.put("ville", ancienneAffectation.getVille());
+        payload.put("commune", ancienneAffectation.getCommune());
+        payload.put("zoneOperationnelle", ancienneAffectation.getZoneOperationnelle());
+        payload.put("superviseur", ancienneAffectation.getSuperviseur());
+        payload.put("client", ancienneAffectation.getClient());
+        payload.put("mission", ancienneAffectation.getMission());
+        payload.put("projet", ancienneAffectation.getProjet());
+        payload.put("heureArriveeSite", ancienneAffectation.getHeureArriveeSite());
+        payload.put("heureDepartSite", ancienneAffectation.getHeureDepartSite());
+
         // 2. Ouvrir la nouvelle affectation (atomique grâce à @Transactional)
-        return creerAffectation(ancienneAffectation.getPoste().getId(), nouvelAgentId, dateRemplacement);
+        return creerAffectation(ancienneAffectation.getPoste().getId(), nouvelAgentId, dateRemplacement, payload);
     }
 
     @Transactional

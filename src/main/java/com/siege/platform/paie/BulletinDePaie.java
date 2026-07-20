@@ -9,7 +9,6 @@ import lombok.Setter;
 import org.hibernate.annotations.Filter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -90,7 +89,7 @@ public class BulletinDePaie {
     private String avantagesDiversCommentaire;
 
     @Column(nullable = false)
-    private LocalDateTime dateCloture;
+    private java.time.LocalDate dateCloture;
 
     @Column(nullable = false)
     private String statutPaiement;

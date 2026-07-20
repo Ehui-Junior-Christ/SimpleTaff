@@ -3,9 +3,13 @@ package com.siege.platform.notification;
 import com.siege.platform.entreprise.Entreprise;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 @Service
 public class NotificationService {
@@ -22,10 +26,19 @@ public class NotificationService {
      * Create an alert and store in database
      */
     public void creerAlerte(Entreprise entreprise, String type, String message) {
+        creerAlerte(entreprise, type, message, "WEBHOOK");
+    }
+
+    /**
+     * Create an alert with custom channel and store in database
+     */
+    public void creerAlerte(Entreprise entreprise, String type, String message, String canal) {
         NotificationEvenement event = new NotificationEvenement();
         event.setEntreprise(entreprise);
         event.setType(type);
+        event.setCanal(canal);
         event.setMessage(message);
+        event.setStatut("A_ENVOYER");
         repository.save(event);
     }
 
@@ -49,9 +62,9 @@ public class NotificationService {
     /**
      * Send alert and email notification
      */
-    public void creerAlerteAvecEmail(Entreprise entreprise, String type, String message, String emailDestinaire) {
-        creerAlerte(entreprise, type, message);
-        envoyerEmailNotification(emailDestinaire, "Notification - " + type, message);
+    public void creerAlerteAvecEmail(Entreprise entreprise, String type, String message, String emailDestinataire) {
+        String formattedMessage = "[TO:" + emailDestinataire + "] " + message;
+        creerAlerte(entreprise, type, formattedMessage, "EMAIL");
     }
 
     /**
@@ -60,7 +73,7 @@ public class NotificationService {
     public void envoyerAlerteHeureRonde(String emailAdmin, String agentName, int heure) {
         String titre = "Alerte pointage - Heure ronde";
         String contenu = "L'agent " + agentName + " a scanné sa carte à " + String.format("%02d:00", heure) + ".";
-        envoyerEmailNotification(emailAdmin, titre, contenu);
+        creerAlerteAvecEmail(null, titre, contenu, emailAdmin);
     }
 
     /**
@@ -68,13 +81,13 @@ public class NotificationService {
      */
     public void envoyerConfirmationFinEquipe(String emailAgent, String agentName, long minutesDuree) {
         String titre = "Confirmation de fin d'équipe";
-        String heures = minutesDuree / 60;
-        String minutes = minutesDuree % 60;
+        long heures = minutesDuree / 60;
+        long minutes = minutesDuree % 60;
         String contenu = String.format(
                 "Bonjour %s,\n\nVotre équipe de %d heures et %d minutes a été enregistrée.\n\nCordialement,\nSimpleTaff",
                 agentName, heures, minutes
         );
-        envoyerEmailNotification(emailAgent, titre, contenu);
+        creerAlerteAvecEmail(null, titre, contenu, emailAgent);
     }
 
     /**
@@ -83,6 +96,68 @@ public class NotificationService {
     public void envoyerAlerteRetard(String emailAdmin, String agentName, int minutesRetard) {
         String titre = "Alerte retard";
         String contenu = "L'agent " + agentName + " est arrivé avec " + minutesRetard + " minutes de retard.";
-        envoyerEmailNotification(emailAdmin, titre, contenu);
+        creerAlerteAvecEmail(null, titre, contenu, emailAdmin);
+    }
+
+    /**
+     * Process pending notifications from the database queue in the background.
+     * Runs every 30 seconds.
+     */
+    @Scheduled(fixedDelay = 30000)
+    @Transactional
+    public void traiterNotificationsPendantes() {
+        List<NotificationEvenement> pending = repository.findByStatut("A_ENVOYER");
+        if (pending.isEmpty()) {
+            return;
+        }
+
+        logger.info("Traitement de {} notifications en attente...", pending.size());
+        for (NotificationEvenement notification : pending) {
+            try {
+                String rawMessage = notification.getMessage();
+                String destinataire = "system@simpletaff.com";
+                String realContent = rawMessage;
+
+                if (rawMessage != null && rawMessage.startsWith("[TO:")) {
+                    int closeBracketIdx = rawMessage.indexOf("]");
+                    if (closeBracketIdx > 4) {
+                        destinataire = rawMessage.substring(4, closeBracketIdx);
+                        realContent = rawMessage.substring(closeBracketIdx + 1).trim();
+                    }
+                }
+
+                String canal = notification.getCanal();
+                if ("EMAIL".equalsIgnoreCase(canal)) {
+                    SimpleMailMessage mailMessage = new SimpleMailMessage();
+                    mailMessage.setTo(destinataire);
+                    mailMessage.setSubject("SimpleTaff - " + notification.getType());
+                    mailMessage.setText(realContent);
+                    mailMessage.setFrom("simpletaff@platform.com");
+                    mailSender.send(mailMessage);
+                    logger.info("Notification EMAIL envoyée à {}", destinataire);
+                } else if ("SMS".equalsIgnoreCase(canal)) {
+                    // Simulate SMS delivery via telecom API log
+                    logger.info("--- ENVOI SMS SIMULÉ ---");
+                    logger.info("Pour : {}", destinataire);
+                    logger.info("Message : {}", realContent);
+                    logger.info("-------------------------");
+                } else if ("PUSH".equalsIgnoreCase(canal)) {
+                    // Simulate Mobile Push Notification
+                    logger.info("--- ENVOI PUSH SIMULÉ ---");
+                    logger.info("Pour l'utilisateur associé à : {}", destinataire);
+                    logger.info("Alerte : {}", realContent);
+                    logger.info("--------------------------");
+                } else {
+                    // Webhook / In-App Notification
+                    logger.info("Notification SYSTEM/WEBHOOK enregistrée : {}", realContent);
+                }
+
+                notification.setStatut("ENVOYE");
+            } catch (Exception e) {
+                logger.error("Erreur lors de l'envoi de la notification {}: {}", notification.getId(), e.getMessage());
+                notification.setStatut("ECHEC");
+            }
+            repository.save(notification);
+        }
     }
 }

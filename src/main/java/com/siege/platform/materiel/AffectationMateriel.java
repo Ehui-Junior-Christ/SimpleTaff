@@ -1,5 +1,6 @@
 package com.siege.platform.materiel;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.siege.platform.agent.AgentTerrain;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Table(name = "affectation_materiel")
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AffectationMateriel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

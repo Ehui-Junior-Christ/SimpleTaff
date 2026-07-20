@@ -52,7 +52,7 @@ public class JwtUtils {
             Jwts.parser().verifyWith(key()).build().parseSignedClaims(authToken);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            // log error
+            e.printStackTrace();
         }
         return false;
     }

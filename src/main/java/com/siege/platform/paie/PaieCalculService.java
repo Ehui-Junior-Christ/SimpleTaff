@@ -3,20 +3,30 @@ package com.siege.platform.paie;
 import com.siege.platform.entreprise.Entreprise;
 import com.siege.platform.poste.Affectation;
 import com.siege.platform.poste.Poste;
+import com.siege.platform.prime.ReglePrimeRendement;
+import com.siege.platform.prime.ReglePrimeRendementRepository;
+import com.siege.platform.evaluation.EvaluationAgent;
+import com.siege.platform.evaluation.EvaluationAgentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class PaieCalculService {
 
     private final BulletinDePaieRepository bulletinDePaieRepository;
+    private final ReglePrimeRendementRepository reglePrimeRendementRepository;
+    private final EvaluationAgentRepository evaluationAgentRepository;
 
-    public PaieCalculService(BulletinDePaieRepository bulletinDePaieRepository) {
+    public PaieCalculService(BulletinDePaieRepository bulletinDePaieRepository,
+                              ReglePrimeRendementRepository reglePrimeRendementRepository,
+                              EvaluationAgentRepository evaluationAgentRepository) {
         this.bulletinDePaieRepository = bulletinDePaieRepository;
+        this.reglePrimeRendementRepository = reglePrimeRendementRepository;
+        this.evaluationAgentRepository = evaluationAgentRepository;
     }
 
     @Transactional
@@ -37,14 +47,8 @@ public class PaieCalculService {
         // 2. Déduction pour absences JUSTIFIÉES LONGUES (au-delà du seuil)
         BigDecimal deductionJustifieeLongue = BigDecimal.ZERO;
         if (joursAbsJustifieeLongue >= entreprise.getSeuilAbsenceLongueJours()) {
-            // Taux de retenue réduite (ex: 25%) -> on déduit 25% de la retenue forfaitaire par jour
             BigDecimal tauxReduction = entreprise.getTauxRetenueReduite().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
             BigDecimal retenueReduiteParJour = retenueForfaitaire.multiply(tauxReduction);
-            
-            int joursAuDelaDuSeuil = joursAbsJustifieeLongue - entreprise.getSeuilAbsenceLongueJours();
-            // NB: La consigne dit "au-delà du seuil". Si on compte le seuil inclus ou exclus, on va appliquer pour les jours excédentaires.
-            // On supposera ici que la retenue s'applique à tous les jours d'absence justifiée longue (ou juste ceux au delà). 
-            // "au-delà du seuil × (retenue forfaitaire × tauxRetenueReduite)" -> on multiplie par le nombre total de jours longue durée
             deductionJustifieeLongue = retenueReduiteParJour.multiply(BigDecimal.valueOf(joursAbsJustifieeLongue));
         }
 
@@ -53,15 +57,56 @@ public class PaieCalculService {
                 .subtract(deductionNonJustifiee)
                 .subtract(deductionJustifieeLongue);
         
-        // Plancher à 0
         if (salaireBrutEffectif.compareTo(BigDecimal.ZERO) < 0) {
             salaireBrutEffectif = BigDecimal.ZERO;
         }
 
-        // 4. Salaire Net Calculé (Taux forfaitaire de cotisation)
+        // 4. Cotisations & Retenues Légales / Conventionnelles (Retenues CNPS, CNAM, ITS)
+        // Part salariale Pension / CNPS (Taux entreprise, ex: 6.3%)
         BigDecimal tauxCotisation = entreprise.getTauxCotisation().divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
-        BigDecimal montantCotisation = salaireBrutEffectif.multiply(tauxCotisation);
-        BigDecimal salaireNetCalcule = salaireBrutEffectif.subtract(montantCotisation).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal montantPension = salaireBrutEffectif.multiply(tauxCotisation);
+
+        // Impôt sur le traitement et salaire (ITS) - simplifié à 2%
+        BigDecimal tauxITS = new BigDecimal("0.02");
+        BigDecimal montantITS = salaireBrutEffectif.multiply(tauxITS);
+
+        // Assurance maladie universelle / Complémentaire santé (CNAM) - simplifiée à 1%
+        BigDecimal tauxCNAM = new BigDecimal("0.01");
+        BigDecimal montantCNAM = salaireBrutEffectif.multiply(tauxCNAM);
+
+        BigDecimal totalDeductionsSociales = montantPension.add(montantITS).add(montantCNAM);
+        BigDecimal baseNetAvantPrimes = salaireBrutEffectif.subtract(totalDeductionsSociales);
+
+        if (baseNetAvantPrimes.compareTo(BigDecimal.ZERO) < 0) {
+            baseNetAvantPrimes = BigDecimal.ZERO;
+        }
+
+        // 5. Calcul automatique de la prime de rendement
+        BigDecimal primeRendement = BigDecimal.ZERO;
+        String primeCommentaire = "";
+        try {
+            List<EvaluationAgent> evals = evaluationAgentRepository.findByAgentIdOrderByAnneeDesc(affectation.getAgent().getId());
+            if (evals != null && !evals.isEmpty()) {
+                int score = evals.get(0).getScoreTotal();
+                List<ReglePrimeRendement> regles = reglePrimeRendementRepository.findAll();
+                ReglePrimeRendement regleAppliquee = null;
+                for (ReglePrimeRendement r : regles) {
+                    if ("ACTIF".equalsIgnoreCase(r.getStatut()) && score >= r.getSeuilMinimum()) {
+                        if (regleAppliquee == null || r.getSeuilMinimum() > regleAppliquee.getSeuilMinimum()) {
+                            regleAppliquee = r;
+                        }
+                    }
+                }
+                if (regleAppliquee != null) {
+                    primeRendement = regleAppliquee.getMontantParPoint().multiply(BigDecimal.valueOf(score));
+                    primeCommentaire = "Prime de rendement de " + primeRendement.setScale(2, RoundingMode.HALF_UP) + " FCFA basée sur le score d'évaluation de " + score + " points (" + regleAppliquee.getLibelle() + ").";
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur calcul automatique de la prime de rendement: " + e.getMessage());
+        }
+
+        BigDecimal salaireNetCalcule = baseNetAvantPrimes.add(primeRendement).setScale(2, RoundingMode.HALF_UP);
 
         BulletinDePaie bulletin = new BulletinDePaie();
         bulletin.setEntreprise(entreprise);
@@ -76,7 +121,12 @@ public class PaieCalculService {
         bulletin.setJoursCongePaye(joursCongePaye);
         bulletin.setSalaireBrutEffectif(salaireBrutEffectif.setScale(2, RoundingMode.HALF_UP));
         bulletin.setSalaireNetCalcule(salaireNetCalcule);
-        bulletin.setDateCloture(LocalDateTime.now());
+        
+        bulletin.setPrimeExceptionnelle(primeRendement.setScale(2, RoundingMode.HALF_UP));
+        bulletin.setTotalPrimes(primeRendement.setScale(2, RoundingMode.HALF_UP));
+        bulletin.setAvantagesDiversCommentaire(primeCommentaire);
+
+        bulletin.setDateCloture(java.time.LocalDate.now());
         bulletin.setStatutPaiement("EN_ATTENTE");
 
         return bulletinDePaieRepository.save(bulletin);

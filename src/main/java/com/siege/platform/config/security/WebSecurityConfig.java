@@ -47,8 +47,21 @@ public class WebSecurityConfig {
     }
 
     @Bean
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+        configuration.setAllowedOrigins(java.util.List.of("*"));
+        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(java.util.List.of("Authorization", "Cache-Control", "Content-Type", "X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        configuration.setExposedHeaders(java.util.List.of("Authorization"));
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers("/api/auth/**").permitAll()
@@ -58,7 +71,8 @@ public class WebSecurityConfig {
                                     "/super-admin", "/super-admin/", "/super-admin/**",
                                     "/admin-entreprise", "/admin-entreprise/", "/admin-entreprise/**",
                                     "/employeur", "/employeur/", "/employeur/**",
-                                    "/coordonnateur", "/coordonnateur/", "/coordonnateur/**").permitAll()
+                                    "/coordonnateur", "/coordonnateur/", "/coordonnateur/**",
+                                    "/uploads/**").permitAll()
                     .anyRequest().authenticated()
             );
 

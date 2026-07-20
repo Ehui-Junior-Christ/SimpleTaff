@@ -2,7 +2,6 @@ package com.siege.platform.dashboard;
 
 import com.siege.platform.common.enums.StatutUtilisateur;
 import com.siege.platform.entreprise.Entreprise;
-import com.siege.platform.entreprise.EntrepriseRepository;
 import com.siege.platform.emploi.Emploi;
 import com.siege.platform.emploi.EmploiRepository;
 import com.siege.platform.config.security.JwtUtils;
@@ -43,7 +42,6 @@ public class OrganisationController {
     private final EmploiRepository emploiRepo;
     private final StructureDemandeuseRepository structureRepo;
     private final SiteRepository siteRepo;
-    private final EntrepriseRepository entrepriseRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
@@ -52,7 +50,6 @@ public class OrganisationController {
                                    EmploiRepository emploiRepo,
                                    StructureDemandeuseRepository structureRepo,
                                    SiteRepository siteRepo,
-                                   EntrepriseRepository entrepriseRepo,
                                    PasswordEncoder passwordEncoder,
                                    JwtUtils jwtUtils) {
         this.zoneRepo = zoneRepo;
@@ -60,7 +57,6 @@ public class OrganisationController {
         this.emploiRepo = emploiRepo;
         this.structureRepo = structureRepo;
         this.siteRepo = siteRepo;
-        this.entrepriseRepo = entrepriseRepo;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
     }
